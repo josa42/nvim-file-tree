@@ -162,16 +162,20 @@ end
 --------------------------------------------------------------------------------
 
 function M.onLeaveUnfocusTree()
-  -- b := p.api.CurrentBuffer()
-  --
-  -- if b.Vars.Bool(BufferVarIsTree) {
-  -- 	tab := p.api.CurrentTab()
-  -- 	window, _ := tab.FindWindow(func(window *neovim.Window) bool {
-  -- 		return !window.Buffer().Vars.Bool(BufferVarIsTree)
-  -- 	})
-  --
-  -- 	window.Focus()
-  -- }
+  local b = vim.api.nvim_get_current_buf()
+  local _, is_tree = pcall(vim.api.nvim_buf_get_var, b, varIsTree)
+  if is_tree then
+    local t = vim.api.nvim_get_current_tabpage()
+
+    local w = ui.findTabpageWindow(t, function(_, wb)
+      local ok, w_is_tree = pcall(vim.api.nvim_buf_get_var, wb, varIsTree)
+      return not ok or not w_is_tree
+    end)
+
+    if w > 0 then
+      vim.api.nvim_set_current_win(w)
+    end
+  end
 end
 
 return M

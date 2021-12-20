@@ -31,6 +31,18 @@ function M.findBuffer(fn)
   return -1
 end
 
+function M.findTabpageWindow(t, fn)
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
+    local b = vim.api.nvim_win_get_buf(w)
+    local ok, result = pcall(fn, w, b)
+    if ok and result then
+      return w
+    end
+  end
+
+  return -1
+end
+
 function M.tabpageHasBuffer(t, b)
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
     local wb = vim.api.nvim_win_get_buf(w)
@@ -40,19 +52,6 @@ function M.tabpageHasBuffer(t, b)
   end
 
   return false
-
-  -- func (t *Tab) (bID int) bool {
-  -- 	wins, _ := t.api.nvim().TabpageWindows(nvim.Tabpage(t.ID()))
-  --
-  -- 	for _, win := range wins {
-  -- 		wb, _ := t.api.nvim().WindowBuffer(win)
-  -- 		if int(wb) == bID {
-  -- 			return true
-  -- 		}
-  -- 	}
-  --
-  -- 	return false
-  -- }
 end
 
 return M
