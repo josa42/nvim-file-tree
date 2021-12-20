@@ -1,6 +1,7 @@
 -- Source: https://github.com/josa42/nvim-filetree/blob/b0d980a03c10ad357c4959d783bf58e81c3d89e3/pkg/plugin.go
 
 local ui = require('jg.file-tree.ui')
+local buf = require('jg.file-tree.buf')
 
 local M = {}
 local l = {}
@@ -50,7 +51,7 @@ end
 
 function l.getTreeBuffer()
   return ui.findBuffer(function(b)
-    return vim.api.nvim_buf_get_var(b, varIsTree)
+    return buf.get_var(b, varIsTree)
   end)
 end
 
@@ -60,8 +61,8 @@ function l.createTreeBuffer()
   vim.cmd('topleft vertical ' .. width .. ' new')
   local b = vim.api.nvim_get_current_buf()
 
-  vim.api.nvim_buf_set_var(b, varIsTree, true)
-  vim.api.nvim_buf_set_var(b, varHideLightline, true)
+  buf.set_var(b, varIsTree, true)
+  buf.set_var(b, varHideLightline, true)
   vim.api.nvim_buf_set_option(b, 'filetype', 'tree')
   vim.api.nvim_buf_set_name(b, bufferName)
 
@@ -147,7 +148,11 @@ function M.onLeaveCloseLastTree()
   if l.hasOnlyTreeBuffer() then
     local t = vim.api.nvim_get_current_tabpage()
     for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
-      vim.api.nvim_win_close(w, true)
+      if #vim.api.nvim_list_wins() == 1 then
+        vim.cmd('quit')
+      else
+        vim.api.nvim_win_close(w, true)
+      end
     end
   end
 end
@@ -163,13 +168,11 @@ end
 
 function M.onLeaveUnfocusTree()
   local b = vim.api.nvim_get_current_buf()
-  local _, is_tree = pcall(vim.api.nvim_buf_get_var, b, varIsTree)
-  if is_tree then
+  if buf.get_var(b, varIsTree) then
     local t = vim.api.nvim_get_current_tabpage()
 
     local w = ui.findTabpageWindow(t, function(_, wb)
-      local ok, w_is_tree = pcall(vim.api.nvim_buf_get_var, wb, varIsTree)
-      return not ok or not w_is_tree
+      return not buf.get_var(wb, varIsTree)
     end)
 
     if w > 0 then
