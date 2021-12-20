@@ -1,25 +1,5 @@
 local M = {}
 
--- func (s SplitModifier) String() string {
--- 	switch s {
--- 	case SplitVertical:
--- 		return "vertical"
--- 	case SplitHorizontal:
--- 		return "horizontal"
--- 	case SplitTopLeft:
--- 		return "topleft"
--- 	case SplitBottomRight:
--- 		return "botright"
--- 	default:
--- 		return ""
--- 	}
--- }
-
--- function M.createSplitBuffer(width, ...)
---   vim.cmd(table.concat(... and { ... } or { 'topleft', 'vertical' }, ' ') .. ' ' .. width .. ' new')
---   return vim.api.nvim_get_current_buf()
--- end
-
 function M.findBuffer(fn)
   for _, b in ipairs(vim.api.nvim_list_bufs()) do
     local ok, result = pcall(fn, b)
