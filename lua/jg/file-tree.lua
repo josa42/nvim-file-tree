@@ -9,7 +9,7 @@ local l = {}
 local bufferName = 'פּ'
 local varIsTree = '__is-file-tree'
 local varHideLightline = 'lightline_hidden'
-local varTreeBuf = 'tree_buffer_id'
+local varTreeBuf = '__tree_buffer_id'
 local varIsOpen = '__file-tree_open'
 local varIsOpening = '__file-tree_opening'
 local width = 40
@@ -162,6 +162,7 @@ function l.createTreeBuffer()
     'nowrap',
     'signcolumn=no',
     'colorcolumn=',
+    'buftype=nofile',
   }, ' '))
 
   vim.cmd('iabclear <buffer>')
