@@ -31,6 +31,17 @@ function M.findBuffer(fn)
   return -1
 end
 
+function M.findWindow(fn)
+  for _, w in ipairs(vim.api.nvim_list_wins()) do
+    local ok, result = pcall(fn, w)
+    if ok and result then
+      return w
+    end
+  end
+
+  return -1
+end
+
 function M.findTabpageWindow(t, fn)
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
     local b = vim.api.nvim_win_get_buf(w)
