@@ -15,8 +15,6 @@ local varIsOpening = '__file-tree_opening'
 local width = 40
 
 function M.setup()
-  print('setup: nvim-file-tree')
-
   vim.api.nvim_set_var(varIsOpen, false)
   vim.api.nvim_set_var(varIsOpening, false)
   vim.api.nvim_set_var(varTreeBuf, -1)
@@ -29,6 +27,13 @@ function M.setup()
   vim.cmd('autocmd BufEnter * call v:lua.require("jg.file-tree").onLeaveCloseLastTree()')
   vim.cmd('autocmd WinLeave * call v:lua.require("jg.file-tree").onLeaveUnfocusTree()')
   vim.cmd('augroup END')
+
+  vim.api.nvim_set_keymap(
+    'n',
+    '<leader>s',
+    ':lua require("jg.file-tree").toggleSmart()<cr>',
+    { noremap = true, silent = true }
+  )
 end
 
 --------------------------------------------------------------------------------
@@ -77,6 +82,45 @@ function M.unfocus()
     l.focusEditor()
   end
 end
+
+function M.toggle()
+  if l.ignoreCurrentTab() then
+    return
+  end
+
+  if vim.api.nvim_get_var(varIsOpen) then
+    M.close()
+  else
+    M.open()
+    M.focus()
+  end
+end
+
+function M.toggleFocus()
+  if l.treeBufferHasFocus() then
+    M.unfocus()
+  elseif l.hasTreeBuffer() then
+    M.focus()
+  else
+    M.open()
+  end
+end
+
+function M.toggleSmart()
+  if l.ignoreCurrentTab() then
+    return
+  end
+
+  if l.treeBufferHasFocus() then
+    M.close()
+  elseif l.hasTreeBuffer() then
+    M.focus()
+  else
+    M.open()
+  end
+end
+
+--------------------------------------------------------------------------------
 
 function l.getOrCreateBuffer()
   local b = l.getTreeBuffer()
