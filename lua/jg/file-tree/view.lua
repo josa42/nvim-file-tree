@@ -178,7 +178,7 @@ function l.renderVisibleLines(prefix, items)
 
   for _, item in ipairs(items) do
     -- TODO proper line rendering
-    table.insert(lines, prefix .. item.name)
+    table.insert(lines, item:render(prefix))
     if l.shouldRenderChildren(item) then
       for _, line in ipairs(l.renderVisibleLines(prefix .. levelPrefix, item:children())) do
         table.insert(lines, line)

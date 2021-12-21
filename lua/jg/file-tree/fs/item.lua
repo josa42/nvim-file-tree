@@ -1,4 +1,5 @@
 local fs = require('jg.file-tree.fs.fs')
+local g = require('jg.file-tree.global')
 
 local FileItem = {}
 
@@ -63,9 +64,9 @@ function FileItem:children()
   local filtered = {}
 
   for _, child in ipairs(self.childItems) do
-    -- 		if ok && !i.provider.is_ignored(i.path) && i.provider.fileStatus.get(i.path, false) != FileStatusIgnored {
+    -- TODO What's provider file status? Simplify it
+    -- i.provider.fileStatus.get(i.path, false) != FileStatusIgnored
     if not self.provider:is_ignored(child.path) then
-      -- 			filtered = append(filtered, c)
       table.insert(filtered, child)
     end
   end
@@ -73,18 +74,19 @@ function FileItem:children()
   return filtered
 end
 
--- function FileItem:String() string {
--- 	icon := i.icon()
--- 	if i.is_dir {
--- 		if i.is_open {
--- 			return fmt.Sprintf("%c %s/", icon, i.name)
--- 		} else {
--- 			return fmt.Sprintf("%c %s/", icon, i.name)
--- 		}
--- 	}
---
--- 	return fmt.Sprintf("%c %s", icon, i.name)
--- }
+function FileItem:render(prefix)
+  local status = ' '
+  -- 	if i, ok := l.item.(Statusable); ok {
+  -- 		status = i.Status()
+  -- 	}
+
+  local icon = self:icon()
+
+  if self.is_dir then
+    return prefix .. status .. icon .. ' ' .. self.name .. '/'
+  end
+  return prefix .. status .. icon .. ' ' .. self.name
+end
 --
 -- // Openable Interface
 --
@@ -104,38 +106,40 @@ end
 -- 	i.is_open = false
 -- }
 --
--- function FileItem:icon() rune {
--- 	icons := iconThemes["default"]
--- 	if i.provider.api.Global.Vars.Bool("nerdfont") {
--- 		icons = iconThemes["nerdfont"]
--- 	}
--- 	if i.is_dir {
--- 		if !i.is_open {
--- 			return icons[0]
---
--- 		} else {
--- 			return icons[1]
--- 		}
--- 	}
---
--- 	return icons[2]
--- }
+function FileItem:icon()
+  local icons = iconThemes['default']
+  if g.get_var('nerdfont') then
+    icons = iconThemes['nerdfont']
+  end
+
+  if self.is_dir then
+    if not self.is_open then
+      return icons[1]
+    else
+      return icons[2]
+    end
+  end
+  --
+  return icons[3]
+end
 --
 -- // statusable interface
 --
--- function FileItem:Status() rune {
--- 	switch i.provider.fileStatus.get(i.path, i.is_dir) {
--- 	case FileStatusChanged:
--- 		return view.ItemStatusChanged
---
--- 	case FileStatusUntracked:
--- 		return view.ItemStatusAdded
---
--- 	case FileStatusConflicted:
--- 		return view.ItemStatusConflicted
---
--- 	default:
--- 		return ' '
--- 	}
--- }
+function FileItem:status()
+  -- 	switch i.provider.fileStatus.get(i.path, i.is_dir) {
+  -- 	case FileStatusChanged:
+  -- 		return view.ItemStatusChanged
+  --
+  -- 	case FileStatusUntracked:
+  -- 		return view.ItemStatusAdded
+  --
+  -- 	case FileStatusConflicted:
+  -- 		return view.ItemStatusConflicted
+  --
+  -- 	default:
+  -- 		return ' '
+  -- 	}
+  return ' '
+end
+
 return FileItem
