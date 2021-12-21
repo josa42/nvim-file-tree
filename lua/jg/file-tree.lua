@@ -2,6 +2,7 @@
 
 local ui = require('jg.file-tree.ui')
 local buf = require('jg.file-tree.buf')
+local renderer = require('jg.file-tree.renderer')
 
 local M = {}
 local l = {}
@@ -38,6 +39,13 @@ end
 
 --------------------------------------------------------------------------------
 -- open
+
+local dummyView = {}
+function dummyView:update() end
+function dummyView:attach(r) end
+function dummyView:lines()
+  return { 'Hello World' }
+end
 
 function M.open()
   if vim.api.nvim_get_var(varIsOpening) or l.ignoreCurrentTab() then
@@ -169,7 +177,8 @@ function l.createTreeBuffer()
   vim.cmd('set winhighlight=Normal:TreeNormal')
   --
   -- p.api.Renderer.Attach(buffer, p.treeView)
-  --
+  M.renderer = renderer.attach(b, dummyView)
+
   vim.api.nvim_set_var(varTreeBuf, b)
   vim.api.nvim_set_var(varIsOpening, false)
 
