@@ -125,12 +125,15 @@ function TreeView:initialize(b)
   --
   -- 	})
   --
-  -- 	nopKeyMaps := []string{"i", "a", "v", "V", "<C>", "<C-v>", "<C-0>", "h", "l", "<Left>", "<Right>", "0", "$", "^"}
-  --
-  -- 	for _, m := range nopKeyMaps {
-  -- 		b.KeyMaps.Disable(neovim.ModeAll, m)
-  -- 	}
-  --
+  local nopKeyMaps = { 'i', 'a', 'v', 'V', '<C>', '<C-v>', '<C-0>', 'h', 'l', '<Left>', '<Right>', '0', '$', '^' }
+
+  for _, k in ipairs(nopKeyMaps) do
+    vim.api.nvim_set_keymap('', k, '<nop>', { silent = true })
+  end
+
+  _G.__tw = self
+  vim.api.nvim_set_keymap('n', '<cr>', ':call v:lua.require("jg.file-tree.view").action()<cr>', { silent = true })
+
   -- 	if p, ok := t.provider.(ActionableTree); ok {
   -- 		for _, a := range p.Actions() {
   -- 			func(a TreeAction) {
@@ -157,6 +160,72 @@ function TreeView:initialize(b)
   -- 	}
 end
 
+function TreeView.action()
+  -- local w = vim.api.nvim_get_current_win()
+  local c = vim.api.nvim_win_get_cursor(0)
+
+  -- TODO fix this pfusch
+  local item = _G.__tw.lineData[c[1]].item
+  if item.is_dir then
+    item.is_open = not item.is_open
+  end
+
+  _G.__tw:rerender()
+end
+
+
+
+
+
+
+
+-- func (p *FileProvider) handleAction(i *FileItem, action string) {
+-- 	switch action {
+-- 	case actions.Activate:
+-- 		if i.isDir {
+-- 			i.is_open = !i.is_open
+-- 		} else {
+-- 			opener.Activate(p.api, i.path)
+-- 		}
+--
+-- 	case actions.ToggleDir:
+-- 		if i.isDir {
+-- 			i.is_open = !i.is_open
+-- 		}
+--
+-- 	case actions.ActivateFile:
+-- 		if !i.isDir {
+-- 			opener.Activate(p.api, i.path)
+-- 		}
+--
+-- 	case actions.Open:
+-- 		opener.Open(p.api, i.path)
+--
+-- 	case actions.OpenTab:
+-- 		opener.OpenTab(p.api, i.path)
+--
+-- 	case actions.OpenHorizontalSplit:
+-- 		opener.OpenHoricontalSplit(p.api, i.path)
+--
+-- 	case actions.OpenVerticalSplit:
+-- 		opener.OpenVerticalSplit(p.api, i.path)
+--
+-- 	case actions.Unfocus:
+-- 		opener.FocusEditor(p.api)
+--
+-- 	case actions.Help:
+-- 		p.api.Out.Print("?: Help - (o)pen - (e)dit - (t)ab - (s)plit - (v)ertical split - ESC unfocus")
+-- 	}
+-- }
+
+
+
+
+
+
+
+
+
 -- func (t *TreeView) Dispose() {
 -- 	if p, ok := t.provider.(Changable); ok {
 -- 		p.Unlisten()
@@ -177,8 +246,7 @@ function l.renderVisibleLines(prefix, items)
   local lines = {}
 
   for _, item in ipairs(items) do
-    -- TODO proper line rendering
-    table.insert(lines, item:render(prefix))
+    table.insert(lines, { item = item, prefix = prefix })
     if l.shouldRenderChildren(item) then
       for _, line in ipairs(l.renderVisibleLines(prefix .. levelPrefix, item:children())) do
         table.insert(lines, line)
@@ -200,7 +268,12 @@ function TreeView:lines()
   -- 	lines = append(lines, l.String())
   -- }
 
-  return self.lineData
+  local lines = {}
+  for _, l in ipairs(self.lineData) do
+    table.insert(lines, l.item:render(l.prefix))
+  end
+
+  return lines
 end
 
 return TreeView
