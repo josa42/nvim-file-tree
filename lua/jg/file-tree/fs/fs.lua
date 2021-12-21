@@ -11,14 +11,17 @@ local M = {}
 -- end
 
 function M.read_dir(path)
-  local p = '*'
-  if path or path ~= '.' then
-    p = M.join(path, '*')
-  end
-
   local names = {}
-  for _, cpath in ipairs(vim.fn.glob(p, false, true)) do
-    table.insert(names, M.basename(cpath))
+
+  local fd = vim.loop.fs_scandir(path)
+  if fd then
+    while true do
+      local name = vim.loop.fs_scandir_next(fd)
+      if name == nil then
+        break
+      end
+      table.insert(names, name)
+    end
   end
 
   return names

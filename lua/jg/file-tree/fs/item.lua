@@ -17,7 +17,7 @@ function FileItem:create(provider, path)
     name = fs.basename(path), -- string
     path = path, -- string
     is_dir = fs.is_dir(path), -- bool
-    isOpen = false, -- bool
+    is_open = true, -- bool
     childItems = {}, -- []view.TreeItem
     matchIgnore = nil, -- *func(string) bool
     provider = provider, -- *FileProvider
@@ -63,8 +63,8 @@ function FileItem:children()
   local filtered = {}
 
   for _, child in ipairs(self.childItems) do
-    -- 		if ok && !i.provider.isIgnored(i.path) && i.provider.fileStatus.get(i.path, false) != FileStatusIgnored {
-    if not self.provider.isIgnored(child.path) then
+    -- 		if ok && !i.provider.is_ignored(i.path) && i.provider.fileStatus.get(i.path, false) != FileStatusIgnored {
+    if not self.provider:is_ignored(child.path) then
       -- 			filtered = append(filtered, c)
       table.insert(filtered, child)
     end
@@ -76,7 +76,7 @@ end
 -- function FileItem:String() string {
 -- 	icon := i.icon()
 -- 	if i.is_dir {
--- 		if i.isOpen {
+-- 		if i.is_open {
 -- 			return fmt.Sprintf("%c %s/", icon, i.name)
 -- 		} else {
 -- 			return fmt.Sprintf("%c %s/", icon, i.name)
@@ -93,15 +93,15 @@ end
 -- }
 --
 -- function FileItem:IsOpen() bool {
--- 	return i.isOpen
+-- 	return i.is_open
 -- }
 --
 -- function FileItem:Open() {
--- 	i.isOpen = true
+-- 	i.is_open = true
 -- }
 --
 -- function FileItem:Close() {
--- 	i.isOpen = false
+-- 	i.is_open = false
 -- }
 --
 -- function FileItem:icon() rune {
@@ -110,7 +110,7 @@ end
 -- 		icons = iconThemes["nerdfont"]
 -- 	}
 -- 	if i.is_dir {
--- 		if !i.isOpen {
+-- 		if !i.is_open {
 -- 			return icons[0]
 --
 -- 		} else {

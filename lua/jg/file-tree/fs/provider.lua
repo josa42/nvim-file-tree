@@ -1,3 +1,4 @@
+local fs = require('jg.file-tree.fs.fs')
 local FileItem = require('jg.file-tree.fs.item')
 
 -- import (
@@ -69,7 +70,13 @@ function FileProvider:updateRootPath()
   return false
 end
 
-function FileProvider:isIgnored(path)
+function FileProvider:is_ignored(path)
+  -- TODO handle this better
+  if fs.basename(path) == '.git' then
+    return true
+  end
+
+  -- TODO gitignore matching
   -- 	pr, _ := filepath.Rel(p.root.path, path)
   -- 	return p.gitignore.Match(pr)
   return false
@@ -109,14 +116,14 @@ end
 -- 	switch action {
 -- 	case actions.Activate:
 -- 		if i.isDir {
--- 			i.isOpen = !i.isOpen
+-- 			i.is_open = !i.is_open
 -- 		} else {
 -- 			opener.Activate(p.api, i.path)
 -- 		}
 --
 -- 	case actions.ToggleDir:
 -- 		if i.isDir {
--- 			i.isOpen = !i.isOpen
+-- 			i.is_open = !i.is_open
 -- 		}
 --
 -- 	case actions.ActivateFile:

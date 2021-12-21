@@ -48,6 +48,7 @@ function M.attach(b, view)
   -- 	if v, ok := view.(Initializable); ok {
   -- 		v.Initialize(b, b.api)
   -- 	}
+  view:initialize(b)
 
   -- 	if v, ok := view.(disposables.Disposable); ok {
   -- 		disposed := false
@@ -60,6 +61,8 @@ function M.attach(b, view)
   -- vim.cmd('autocmd BufWipeout <buffer=' .. b .. '> call v:lua.print("WIPE")')
 
   vr:render()
+
+  return vr
 end
 
 return M
