@@ -1,3 +1,5 @@
+local fn_wrap = require('jg.file-tree.fn').wrap
+
 local M = {}
 
 function M.get_var(b, name)
@@ -38,20 +40,23 @@ function M.close(b)
   end
 end
 
-M.__on_handler = {}
-local onTpl = 'autocmd %s <buffer=%s> call v:lua.require("jg.file-tree.buf").__on_handler[%s]()'
+local onTpl = 'autocmd %s <buffer=%s> %s'
 
 function M.on(b, evt, fn)
-  table.insert(M.__on_handler, fn)
-  vim.cmd(onTpl:format(evt, b, #M.__on_handler))
+  local cmd, dispose = fn_wrap(fn)
+  vim.cmd(onTpl:format(evt, b, cmd))
 
-  -- local idx = #M.__on_handler
-  -- vim.cmd(
-  --   'autocmd ' .. evt .. ' <buffer=' .. b .. '> call v:lua.require("jg.file-tree.buf").__on_handler[' .. idx .. ']()'
-  -- )
+  return function()
+    -- TODO dispose autocmd
+    dispose()
+  end
+end
 
-  -- TODO dispose
-  return function() end
+function M.is_empty(b)
+  if b ~= -1 then
+    local lines = vim.api.nvim_buf_get_lines(b, 0, -1, false) or { '' }
+    return #lines <= 1 and lines[1] == ''
+  end
 end
 
 return M

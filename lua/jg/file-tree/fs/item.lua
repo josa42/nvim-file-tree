@@ -18,7 +18,7 @@ function FileItem:create(provider, path)
     name = fs.basename(path), -- string
     path = path, -- string
     is_dir = fs.is_dir(path), -- bool
-    is_open = true, -- bool
+    is_open = false, -- bool
     childItems = {}, -- []view.TreeItem
     matchIgnore = nil, -- *func(string) bool
     provider = provider, -- *FileProvider
@@ -83,9 +83,9 @@ function FileItem:render(prefix)
   local icon = self:icon()
 
   if self.is_dir then
-    return prefix .. status .. icon .. ' ' .. self.name .. '/'
+    return prefix .. status .. ' ' .. icon .. ' ' .. self.name .. '/'
   end
-  return prefix .. status .. icon .. ' ' .. self.name
+  return prefix .. status .. ' ' .. icon .. ' ' .. self.name
 end
 --
 -- // Openable Interface

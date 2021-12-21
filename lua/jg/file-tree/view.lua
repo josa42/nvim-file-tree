@@ -1,3 +1,7 @@
+local buf = require('jg.file-tree.buf')
+local fn_wrap = require('jg.file-tree.fn').wrap
+local actions = require('jg.file-tree.actions')
+
 local l = {}
 
 -- package view
@@ -53,20 +57,6 @@ local levelPrefix = '  '
 -- 	Unlisten()
 -- }
 --
--- type line struct {
--- 	prefix string
--- 	item   TreeItem
--- }
---
--- func (l *line) String() string {
--- 	status := ' '
--- 	if i, ok := l.item.(Statusable); ok {
--- 		status = i.Status()
--- 	}
---
--- 	return fmt.Sprintf("%s%s %s", l.prefix, string(status), l.item.String())
--- }
---
 -- // Interface Assertions
 -- var _ neovim.View = (*TreeView)(nil)
 -- var _ neovim.Initializable = (*TreeView)(nil)
@@ -114,7 +104,33 @@ function TreeView:rerender()
   self.renderer:render()
 end
 
+local mapCmdTpl = ':%s<cr>'
+
+function TreeView:wrap_action(action)
+  local treeView = self
+
+  -- TODO handle disposing
+  local cmd, _ = fn_wrap(function()
+    local c = vim.api.nvim_win_get_cursor(0)
+
+    local item = treeView.lineData[c[1]].item
+    if item then
+      action(item)
+    end
+
+    treeView:rerender()
+  end)
+
+  return mapCmdTpl:format(cmd)
+end
+
 function TreeView:initialize(b)
+  buf.on(b, 'CursorMoved', function()
+    local c = vim.api.nvim_win_get_cursor(0)
+    vim.api.nvim_win_set_cursor(0, { c[1], 0 })
+    vim.cmd('normal! <C-c>')
+    vim.cmd('set nohlsearch')
+  end)
   --
   -- 	b.On(neovim.EventCursorMoved, func() {
   -- 		w := api.CurrentWindow()
@@ -126,58 +142,34 @@ function TreeView:initialize(b)
   -- 	})
   --
   local nopKeyMaps = { 'i', 'a', 'v', 'V', '<C>', '<C-v>', '<C-0>', 'h', 'l', '<Left>', '<Right>', '0', '$', '^' }
-
   for _, k in ipairs(nopKeyMaps) do
     vim.api.nvim_set_keymap('', k, '<nop>', { silent = true })
   end
 
-  _G.__tw = self
-  vim.api.nvim_set_keymap('n', '<cr>', ':call v:lua.require("jg.file-tree.view").action()<cr>', { silent = true })
+  -- local treeView = self
 
-  -- 	if p, ok := t.provider.(ActionableTree); ok {
-  -- 		for _, a := range p.Actions() {
-  -- 			func(a TreeAction) {
-  -- 				fn := api.Handler.Create(func() {
-  -- 					win := api.CurrentWindow()
-  -- 					cursor := win.Cursor()
-  -- 					idx := cursor.Y() - 1
+  -- -- TODO handle disposing
+  -- local cmd = fn_wrap(function()
+  --   local c = vim.api.nvim_win_get_cursor(0)
   --
-  -- 					if idx >= 0 && idx < len(t.lines) {
-  -- 						a.Handler(t.lines[idx].item)
-  -- 						t.renderer.ShouldRender()
-  -- 					}
-  -- 				})
-  -- 				t.disposables.Add(fn)
-  -- 				b.KeyMaps.Set(neovim.ModeNormal, a.Keys, fmt.Sprintf(`:silent call %s<CR>`, fn))
-  -- 			}(a)
-  -- 		}
-  -- 	}
+  --   local item = treeView.lineData[c[1]].item
+  --   if item.is_dir then
+  --     item.is_open = not item.is_open
+  --   end
   --
+  --   treeView:rerender()
+  -- end)
+
+  for key, fn in pairs(actions) do
+    vim.api.nvim_buf_set_keymap(b, 'n', key, self:wrap_action(fn), { silent = true })
+  end
+
   -- 	if p, ok := t.provider.(Changable); ok {
   -- 		p.Listen(func() {
   -- 			t.renderer.ShouldRender()
   -- 		})
   -- 	}
 end
-
-function TreeView.action()
-  -- local w = vim.api.nvim_get_current_win()
-  local c = vim.api.nvim_win_get_cursor(0)
-
-  -- TODO fix this pfusch
-  local item = _G.__tw.lineData[c[1]].item
-  if item.is_dir then
-    item.is_open = not item.is_open
-  end
-
-  _G.__tw:rerender()
-end
-
-
-
-
-
-
 
 -- func (p *FileProvider) handleAction(i *FileItem, action string) {
 -- 	switch action {
@@ -217,14 +209,6 @@ end
 -- 		p.api.Out.Print("?: Help - (o)pen - (e)dit - (t)ab - (s)plit - (v)ertical split - ESC unfocus")
 -- 	}
 -- }
-
-
-
-
-
-
-
-
 
 -- func (t *TreeView) Dispose() {
 -- 	if p, ok := t.provider.(Changable); ok {
