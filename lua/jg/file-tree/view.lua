@@ -143,7 +143,7 @@ function TreeView:initialize(b)
   --
   local nopKeyMaps = { 'i', 'a', 'v', 'V', '<C>', '<C-v>', '<C-0>', 'h', 'l', '<Left>', '<Right>', '0', '$', '^' }
   for _, k in ipairs(nopKeyMaps) do
-    vim.api.nvim_set_keymap('', k, '<nop>', { silent = true })
+    vim.api.nvim_buf_set_keymap(b, '', k, '<nop>', { silent = true })
   end
 
   -- local treeView = self
