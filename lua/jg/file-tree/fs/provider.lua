@@ -37,8 +37,8 @@ function Provider:update()
 end
 
 function Provider:trigger_changed()
-  if self.delegate ~= nil then
-    self.delegate:render()
+  if self.renderer ~= nil then
+    self.renderer:render()
   end
 end
 

@@ -190,6 +190,7 @@ function l.createTreeBuffer()
   end
 
   M.renderer = renderer.attach(b, treeView)
+  provider.delegate = M.renderer
 
   vim.api.nvim_set_var(varTreeBuf, b)
   vim.api.nvim_set_var(varIsOpening, false)

@@ -19,7 +19,7 @@ function M.Renderer:render()
 
   self.view:update()
 
-  local lines = self.view:lines()
+  local lines = self.view:render_lines()
   local linesHash = vim.fn.json_encode(lines)
 
   if self.linesHash ~= linesHash then
@@ -27,7 +27,7 @@ function M.Renderer:render()
     buf.set_option(self.buf, 'readonly', false)
     local c = vim.api.nvim_win_get_cursor(0)
 
-    buf.set_lines(self.buf, self.view:lines())
+    buf.set_lines(self.buf, lines)
 
     buf.set_option(self.buf, 'modifiable', false)
     buf.set_option(self.buf, 'readonly', true)
