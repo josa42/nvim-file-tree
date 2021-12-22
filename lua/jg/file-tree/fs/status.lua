@@ -47,7 +47,7 @@ local expIgnored = l.regexpr('\\v^\\!\\!')
 
 -- local expStatusLine = regexpr('^(..) (.*)$')
 
-function M:create(dir)
+function M:create(dir, delegate)
   local o = {}
 
   assert(dir ~= nil, 'dir must be set')
@@ -56,6 +56,8 @@ function M:create(dir)
   self.__index = self
 
   o.files = {}
+  o.delegate = delegate
+
   o:set_dir(dir)
 
   return o
