@@ -1,20 +1,13 @@
 local run = require('jg.file-tree.exec').run
 
-local M = {}
+local status = {}
 local l = {}
 
-function l.regexpr(expr_str)
-  local expr = vim.regex(expr_str)
-  return function(str)
-    return expr:match_str(str) ~= nil
-  end
-end
-
-M.Normal = 'normal'
-M.Ignored = 'ignored'
-M.Changed = 'changed'
-M.Untracked = 'untracked'
-M.Conflicted = 'conflicted'
+status.Normal = 'normal'
+status.Ignored = 'ignored'
+status.Changed = 'changed'
+status.Untracked = 'untracked'
+status.Conflicted = 'conflicted'
 
 --  [AMD]   = not updated
 -- M[ MD]   = updated in index
@@ -25,11 +18,11 @@ M.Conflicted = 'conflicted'
 -- [ MARC]M = work tree changed since index
 -- [ D]R    = renamed in work tree
 -- [ D]C    = copied in work tree
-local expChanged = l.regexpr('\\v^( [AMD]|M[ MD]|A[ MD]|R[ MD]|C[ MD]|[MARC] |[ MARC]M|[ D]R|[ D]C)')
+local expChanged = vim.regex('\\v^( [AMD]|M[ MD]|A[ MD]|R[ MD]|C[ MD]|[MARC] |[ MARC]M|[ D]R|[ D]C)')
 --
 -- [ MARC]D = deleted in work tree
 -- D        =deleted from index
-local expDeleted = l.regexpr('\\v^([ MARC]D|D )')
+local expDeleted = vim.regex('\\v^([ MARC]D|D )')
 
 -- AU = unmerged, added by us
 -- UD = unmerged, deleted by them
@@ -37,17 +30,15 @@ local expDeleted = l.regexpr('\\v^([ MARC]D|D )')
 -- DU = unmerged, deleted by us
 -- AA = unmerged, both added
 -- UU = unmerged, both modified
-local expConflicted = l.regexpr('\\v^(DD|AU|UD|UA|DU|AA|UU)')
+local expConflicted = vim.regex('\\v^(DD|AU|UD|UA|DU|AA|UU)')
 
 -- untracked
-local expUntracked = l.regexpr('\\v^\\?\\?')
+local expUntracked = vim.regex('\\v^\\?\\?')
 
 -- ignored
-local expIgnored = l.regexpr('\\v^\\!\\!')
+local expIgnored = vim.regex('\\v^\\!\\!')
 
--- local expStatusLine = regexpr('^(..) (.*)$')
-
-function M:create(dir, delegate)
+function status:create(dir, delegate)
   local o = {}
 
   assert(dir ~= nil, 'dir must be set')
@@ -63,13 +54,13 @@ function M:create(dir, delegate)
   return o
 end
 
-function M:set_dir(dir)
+function status:set_dir(dir)
   self.dir = l.trim_right(dir, '/')
 end
 
-function M:update()
+function status:update()
   local s = self
-  run({ 'git', 'status', '--short', '--ignored' }, function(code, out)
+  run({ 'git', 'status', '--short', '--ignored' }, function(_, out)
     vim.schedule(function()
       local files = {}
       for _, line in ipairs(vim.fn.split(out, '\n')) do
@@ -86,12 +77,12 @@ function M:update()
   end)
 end
 
-function M:get(path, is_dir)
+function status:get(path, is_dir)
   path = l.trim_right(path, '/')
   path = l.strip_prefix(path, self.dir .. '/')
 
   if is_dir then
-    for _, s in ipairs({ M.Conflicted, M.Changed, M.Untracked }) do
+    for _, s in ipairs({ status.Conflicted, status.Changed, status.Untracked }) do
       if self:dirContains(path, s) then
         return s
       end
@@ -100,10 +91,10 @@ function M:get(path, is_dir)
     return self.files[path]
   end
 
-  return M.Normal
+  return status.Normal
 end
 
-function M:dirContains(path, fileStatus)
+function status:dirContains(path, fileStatus)
   path = l.trim_right(path, '/') .. '/'
 
   for p, fs in pairs(self.files or {}) do
@@ -116,26 +107,17 @@ function M:dirContains(path, fileStatus)
 end
 
 function l.get_status(line)
-  if expConflicted(line) then
-    return M.Conflicted
+  if expConflicted:match_str(line) ~= nil then
+    return status.Conflicted
+  elseif expUntracked:match_str(line) ~= nil then
+    return status.Untracked
+  elseif expIgnored:match_str(line) ~= nil then
+    return status.Ignored
+  elseif expChanged:match_str(line) ~= nil then
+    return status.Changed
   end
 
-  if expUntracked(line) then
-    return M.Untracked
-  end
-
-  if expIgnored(line) then
-    return M.Ignored
-  end
-
-  if expChanged(line) then
-    return M.Changed
-  end
-  --
-  -- if m != "  " {
-  -- 	log.Printf("default: '%s'", m)
-  -- }
-  return M.Normal
+  return status.Normal
 end
 
 function l.trim_right(str, char)
@@ -157,4 +139,4 @@ function l.strip_prefix(str, prefix)
   return str
 end
 
-return M
+return status
