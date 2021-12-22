@@ -41,7 +41,7 @@ local actions = {
   end,
   ['<2-LeftMouse>'] = function(item)
     if not item.is_dir then
-      select('edit', item)
+      select(item)
     end
   end,
   ['<LeftRelease>'] = function(item)
