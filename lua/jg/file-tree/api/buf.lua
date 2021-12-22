@@ -31,8 +31,8 @@ end
 
 local onTpl = '<buffer=%s>'
 
-function M.on(b, evt, fn)
-  return g.on(evt, onTpl:format(b), fn)
+function M.on(b, evt, handler)
+  return g.on(evt, onTpl:format(b), handler)
 end
 
 function M.is_empty(b)
@@ -55,9 +55,18 @@ end
 
 local mapCmdTpl = ':%s<cr>'
 
-function M.set_keymap(b, key, handler, opts)
+function M.set_keymap(b, mode, key, handler, opts)
   opts = opts or { silent = true, noremap = true }
-  vim.api.nvim_buf_set_keymap(b, 'n', key, mapCmdTpl:format(fn.wrap(handler)), opts)
+
+  if type(handler) ~= 'string' then
+    handler = mapCmdTpl:format(fn.wrap(handler))
+  end
+
+  vim.api.nvim_buf_set_keymap(b, mode, key, handler, opts)
+
+  return function()
+    -- TODO dispose
+  end
 end
 
 return M

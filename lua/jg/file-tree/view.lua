@@ -1,5 +1,4 @@
 local buf = require('jg.file-tree.api.buf')
-local fn_wrap = require('jg.file-tree.api.fn').wrap
 local actions = require('jg.file-tree.actions')
 
 local l = {}
@@ -23,13 +22,10 @@ function TreeView:attach(renderer)
   self.renderer = renderer
 end
 
-local mapCmdTpl = ':%s<cr>'
-
 function TreeView:wrap_action(action)
   local treeView = self
 
-  -- TODO handle disposing
-  local cmd, _ = fn_wrap(function()
+  return function()
     local c = vim.api.nvim_win_get_cursor(0)
 
     local item = treeView.lines[c[1]].item
@@ -38,9 +34,7 @@ function TreeView:wrap_action(action)
     end
 
     treeView.renderer:render()
-  end)
-
-  return mapCmdTpl:format(cmd)
+  end
 end
 
 function TreeView:initialize(b)
@@ -53,11 +47,12 @@ function TreeView:initialize(b)
   --
   local nopKeyMaps = { 'i', 'a', 'v', 'V', '<C>', '<C-v>', '<C-0>', 'h', 'l', '<Left>', '<Right>', '0', '$', '^' }
   for _, k in ipairs(nopKeyMaps) do
-    vim.api.nvim_buf_set_keymap(b, '', k, '<nop>', { silent = true })
+    buf.set_keymap(b, '', k, '<nop>')
   end
 
   for key, fn in pairs(actions) do
-    vim.api.nvim_buf_set_keymap(b, 'n', key, self:wrap_action(fn), { silent = true })
+    -- TODO handle disposing
+    buf.set_keymap(b, 'n', key, self:wrap_action(fn))
   end
 end
 
