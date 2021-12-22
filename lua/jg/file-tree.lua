@@ -9,73 +9,50 @@ local FileProvider = require('jg.file-tree.fs.provider')
 local M = {}
 local l = {}
 
-local bufferName = 'פּ'
-local varIsTree = '__is-file-tree'
-local varHideLightline = 'lightline_hidden'
-local varTreeBuf = '__tree_buffer_id'
-local varIsOpen = '__file-tree_open'
-local varIsOpening = '__file-tree_opening'
+local buffer_name = 'פּ'
+local var_is_tree = '__is-file-tree'
+local var_hide_lightline = 'lightline_hidden'
+local var_tree_buf = '__tree_buffer_id'
+local var_is_open = '__file-tree_open'
+local var_is_opening = '__file-tree_opening'
 local width = 40
 
 function M.setup()
-  vim.api.nvim_set_var(varIsOpen, false)
-  vim.api.nvim_set_var(varIsOpening, false)
-  vim.api.nvim_set_var(varTreeBuf, -1)
-
-  -- tp.treeView = view.NewTreeView(files.NewFileProvider(api))
+  vim.api.nvim_set_var(var_is_open, false)
+  vim.api.nvim_set_var(var_is_opening, false)
+  vim.api.nvim_set_var(var_tree_buf, -1)
 
   vim.cmd('augroup jg.file-tree')
   vim.cmd('autocmd!')
-  vim.cmd('autocmd WinEnter * call v:lua.require("jg.file-tree").onEnterSyncState()')
-  vim.cmd('autocmd BufEnter * call v:lua.require("jg.file-tree").onLeaveCloseLastTree()')
-  vim.cmd('autocmd WinLeave * call v:lua.require("jg.file-tree").onLeaveUnfocusTree()')
+  vim.cmd('autocmd WinEnter * call v:lua.require("jg.file-tree").on_enter_sync_state()')
+  vim.cmd('autocmd BufEnter * call v:lua.require("jg.file-tree").on_leave_close_last_tree()')
+  vim.cmd('autocmd WinLeave * call v:lua.require("jg.file-tree").on_leave_unfocus_tree()')
   vim.cmd('augroup END')
-
-  vim.api.nvim_set_keymap(
-    'n',
-    '<leader>s',
-    ':lua require("jg.file-tree").toggleSmart()<cr>',
-    { noremap = true, silent = true }
-  )
 end
 
 --------------------------------------------------------------------------------
 -- open
 
-local provider
-local treeView
-
--- local dummyView = {}
--- function dummyView:update() end
--- function dummyView:attach(r) end
--- function dummyView:lines()
---   return { 'Hello World' }
--- end
-
 function M.open()
-  if vim.api.nvim_get_var(varIsOpening) or l.ignoreCurrentTab() then
-    return
+  vim.api.nvim_set_var(var_is_opening, true)
+  vim.api.nvim_set_var(var_is_open, true)
+
+  local b = l.get_or_create_buffer()
+  if not l.tab_has_tree_buffer() then
+    l.tab_attach_tree_buffer(b)
   end
 
-  vim.api.nvim_set_var(varIsOpening, true)
-  vim.api.nvim_set_var(varIsOpen, true)
-
-  local b = l.getOrCreateBuffer()
-  if not l.hasTreeBuffer() then
-    l.attachTreeBuffer(b)
-  end
-
-  vim.api.nvim_set_var(varIsOpening, false)
+  vim.api.nvim_set_var(var_is_opening, false)
 end
 
 function M.close()
-  vim.api.nvim_set_var(varIsOpen, false)
-  buf.close(l.getTreeBuffer())
+  vim.api.nvim_set_var(var_is_open, false)
+  buf.close(l.get_tree_buffer())
 end
 
 function M.focus()
-  if not l.treeBufferHasFocus() then
-    local b = l.getTreeBuffer()
+  if not l.tree_buffer_has_focus() then
+    local b = l.get_tree_buffer()
     if b > 0 then
       local t = vim.api.nvim_get_current_tabpage()
 
@@ -91,17 +68,13 @@ function M.focus()
 end
 
 function M.unfocus()
-  if l.treeBufferHasFocus() then
-    l.focusEditor()
+  if l.tree_buffer_has_focus() then
+    l.focus_editor()
   end
 end
 
 function M.toggle()
-  if l.ignoreCurrentTab() then
-    return
-  end
-
-  if vim.api.nvim_get_var(varIsOpen) then
+  if vim.api.nvim_get_var(var_is_open) then
     M.close()
   else
     M.open()
@@ -109,24 +82,20 @@ function M.toggle()
   end
 end
 
-function M.toggleFocus()
-  if l.treeBufferHasFocus() then
+function M.toggle_focus()
+  if l.tree_buffer_has_focus() then
     M.unfocus()
-  elseif l.hasTreeBuffer() then
+  elseif l.tab_has_tree_buffer() then
     M.focus()
   else
     M.open()
   end
 end
 
-function M.toggleSmart()
-  if l.ignoreCurrentTab() then
-    return
-  end
-
-  if l.treeBufferHasFocus() then
+function M.toggle_smart()
+  if l.tree_buffer_has_focus() then
     M.close()
-  elseif l.hasTreeBuffer() then
+  elseif l.tab_has_tree_buffer() then
     M.focus()
   else
     M.open()
@@ -135,31 +104,31 @@ end
 
 --------------------------------------------------------------------------------
 
-function l.getOrCreateBuffer()
-  local b = l.getTreeBuffer()
+function l.get_or_create_buffer()
+  local b = l.get_tree_buffer()
   if b ~= -1 then
     return b
   end
 
-  return l.createTreeBuffer()
+  return l.create_tree_buffer()
 end
 
-function l.getTreeBuffer()
+function l.get_tree_buffer()
   return ui.findBuffer(function(b)
-    return buf.get_var(b, varIsTree)
+    return buf.get_var(b, var_is_tree)
   end)
 end
 
-function l.createTreeBuffer()
-  vim.api.nvim_set_var(varIsOpening, true)
+function l.create_tree_buffer()
+  vim.api.nvim_set_var(var_is_opening, true)
 
   vim.cmd('topleft vertical ' .. width .. ' new')
   local b = vim.api.nvim_get_current_buf()
 
-  buf.set_var(b, varIsTree, true)
-  buf.set_var(b, varHideLightline, true)
+  buf.set_var(b, var_is_tree, true)
+  buf.set_var(b, var_hide_lightline, true)
   vim.api.nvim_buf_set_option(b, 'filetype', 'tree')
-  vim.api.nvim_buf_set_name(b, bufferName)
+  vim.api.nvim_buf_set_name(b, buffer_name)
 
   --
   vim.cmd('setlocal ' .. table.concat({
@@ -181,34 +150,27 @@ function l.createTreeBuffer()
   vim.cmd('iabclear <buffer>')
   vim.cmd('set winhighlight=Normal:TreeNormal')
   --
-  -- p.api.Renderer.Attach(buffer, p.treeView)
-  -- M.renderer = renderer.attach(b, dummyView)
-  --
-  if treeView == nil then
-    provider = FileProvider:create()
-    treeView = TreeView:create(provider)
+  if M.tree_view == nil then
+    M.provider = FileProvider:create()
+    M.tree_view = TreeView:create(M.provider)
   end
 
-  M.renderer = renderer.attach(b, treeView)
-  provider.delegate = M.renderer
+  M.provider.delegate = renderer.attach(b, M.tree_view)
 
-  vim.api.nvim_set_var(varTreeBuf, b)
-  vim.api.nvim_set_var(varIsOpening, false)
+  vim.api.nvim_set_var(var_tree_buf, b)
+  vim.api.nvim_set_var(var_is_opening, false)
 
   return b
 end
 
-function l.hasTreeBuffer()
+function l.tab_has_tree_buffer()
   local t = vim.api.nvim_get_current_tabpage()
-  local b = l.getTreeBuffer()
+  local b = l.get_tree_buffer()
 
   return b > 0 and ui.tabpageHasBuffer(t, b)
 end
 
-function l.attachTreeBuffer(b)
-  -- TODO this is not needed is it?
-  vim.api.nvim_set_var(varTreeBuf, b)
-
+function l.tab_attach_tree_buffer(b)
   vim.cmd('topleft vertical ' .. width .. ' new | buffer ' .. b)
 
   local w = vim.api.nvim_get_current_win()
@@ -218,20 +180,13 @@ end
 --------------------------------------------------------------------------------
 -- Sync open file tree across tabs
 
-function M.onEnterSyncState()
-  if vim.api.nvim_get_var(varIsOpening) then
+function M.on_enter_sync_state()
+  if vim.api.nvim_get_var(var_is_opening) then
     return
   end
 
-  if l.ignoreCurrentTab() then
-    -- if b, found := p.getTreeBuffer(); found {
-    -- 	b.Close()
-    -- }
-    return
-  end
-
-  if vim.api.nvim_get_var(varIsOpen) then
-    local focus = l.treeBufferHasFocus()
+  if vim.api.nvim_get_var(var_is_open) then
+    local focus = l.tree_buffer_has_focus()
 
     M.open()
 
@@ -245,12 +200,12 @@ end
 
 --------------------------------------------------------------------------------
 
-function M.onLeaveCloseLastTree()
-  if vim.api.nvim_get_var(varIsOpening) then
+function M.on_leave_close_last_tree()
+  if vim.api.nvim_get_var(var_is_opening) then
     return
   end
 
-  if l.hasOnlyTreeBuffer() then
+  if l.has_only_tree_buffer() then
     local t = vim.api.nvim_get_current_tabpage()
     for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
       if #vim.api.nvim_list_wins() == 1 then
@@ -262,22 +217,22 @@ function M.onLeaveCloseLastTree()
   end
 end
 
-function l.hasOnlyTreeBuffer()
+function l.has_only_tree_buffer()
   local t = vim.api.nvim_get_current_tabpage()
-  local b = vim.api.nvim_get_var(varTreeBuf)
+  local b = vim.api.nvim_get_var(var_tree_buf)
 
   return ui.tabpageHasBuffer(t, b) and #vim.api.nvim_tabpage_list_wins(t) == 1
 end
 
 --------------------------------------------------------------------------------
 
-function M.onLeaveUnfocusTree()
+function M.on_leave_unfocus_tree()
   local b = vim.api.nvim_get_current_buf()
-  if buf.get_var(b, varIsTree) then
+  if buf.get_var(b, var_is_tree) then
     local t = vim.api.nvim_get_current_tabpage()
 
     local w = ui.findTabpageWindow(t, function(_, wb)
-      return not buf.get_var(wb, varIsTree)
+      return not buf.get_var(wb, var_is_tree)
     end)
 
     if w > 0 then
@@ -289,26 +244,16 @@ end
 --------------------------------------------------------------------------------
 -- utils
 
-function l.ignoreCurrentTab()
-  -- for _, w := range p.api.CurrentTab().Windows() {
-  -- 	if expIsVimspector.MatchString(w.Buffer().Path()) {
-  -- 		return true
-  -- 	}
-  -- }
-  --
-  return false
-end
-
-function l.treeBufferHasFocus()
-  local b = vim.api.nvim_get_var(varTreeBuf)
+function l.tree_buffer_has_focus()
+  local b = vim.api.nvim_get_var(var_tree_buf)
   return b > 0 and b == vim.api.nvim_get_current_buf()
 end
 
-function l.focusEditor()
+function l.focus_editor()
   local t = vim.api.nvim_get_current_tabpage()
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
     local b = vim.api.nvim_win_get_buf(w)
-    if not buf.get_var(b, varIsTree) then
+    if not buf.get_var(b, var_is_tree) then
       vim.api.nvim_set_current_win(w)
     end
   end
