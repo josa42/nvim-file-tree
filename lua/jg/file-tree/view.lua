@@ -129,9 +129,9 @@ end
 function TreeView:initialize(b)
   buf.on(b, 'CursorMoved', function()
     local c = vim.api.nvim_win_get_cursor(0)
-    vim.api.nvim_win_set_cursor(0, { c[1], 0 })
-    vim.cmd('normal! <C-c>')
-    vim.cmd('set nohlsearch')
+    if c[2] ~= 0 then
+      vim.api.nvim_win_set_cursor(0, { c[1], 0 })
+    end
   end)
   --
   -- 	b.On(neovim.EventCursorMoved, func() {

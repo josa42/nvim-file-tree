@@ -81,7 +81,6 @@ function FileProvider:update()
     self.rootItem.path = dir
     self:watch(dir)
     self.status:set_dir(dir)
-
   end
 
   self.status:update()
@@ -120,7 +119,6 @@ function FileProvider:is_ignored(path)
   -- 	return p.gitignore.Match(pr)
   return false
 end
-
 
 -- // Actionable Interface
 --

@@ -69,14 +69,16 @@ function M:update()
   local s = self
   run({ 'git', 'status', '--short' }, function(code, out)
     vim.schedule(function()
-      s.files = {}
+      local files = {}
       for _, line in ipairs(vim.fn.split(out, '\n')) do
-        s.files[line:sub(4)] = l.get_status(line)
+        files[line:sub(4)] = l.get_status(line)
       end
 
-      -- TODO notify delegate
-      if s.delegate ~= nil then
-        self.delegate:trigger_changed()
+      if vim.fn.json_encode(s.files) ~= vim.fn.json_encode(files) then
+        s.files = files
+        if s.delegate ~= nil then
+          self.delegate:trigger_changed()
+        end
       end
     end)
   end)
