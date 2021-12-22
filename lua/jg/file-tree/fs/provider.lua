@@ -17,13 +17,9 @@ function Provider:create()
   o.status = status:create(dir, o)
   o.root = Item:create(o, dir)
 
-  o:watch(dir)
-
-  g.on('DirChanged', '*', function()
+  o.watcher = watcher:create(function()
     o:update()
   end)
-
-  o:update()
 
   return o
 end
@@ -33,7 +29,6 @@ function Provider:update()
 
   if self.root.path ~= dir then
     self.root.path = dir
-    self:watch(dir)
     self.status:set_dir(dir)
   end
 
@@ -45,17 +40,6 @@ function Provider:trigger_changed()
   if self.delegate ~= nil then
     self.delegate:render()
   end
-end
-
-function Provider:watch(dir)
-  if self.disposeUpdater ~= nil then
-    self.disposeUpdater()
-  end
-
-  local p = self
-  self.disposeUpdater = watcher.watch(dir, function()
-    p:update()
-  end)
 end
 
 function Provider:is_ignored(path)
