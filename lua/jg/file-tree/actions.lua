@@ -34,7 +34,7 @@ end
 local actions = {
   ['<CR>'] = function(item)
     if item.is_dir then
-      item.is_open = not item.is_open
+      item:toggle()
     else
       select(item)
     end
@@ -46,12 +46,11 @@ local actions = {
   end,
   ['<LeftRelease>'] = function(item)
     if item.is_dir then
-      item.is_open = not item.is_open
+      item:toggle()
     end
   end,
   ['o'] = function(item)
     if not item.is_dir then
-      -- TODO select of already open
       open('edit', item)
     end
   end,
@@ -62,12 +61,12 @@ local actions = {
   end,
   ['<left>'] = function(item)
     if item.is_dir then
-      item.is_open = false
+      item:close()
     end
   end,
   ['<right>'] = function(item)
     if item.is_dir then
-      item.is_open = true
+      item:open()
     else
       open('edit', item)
       require('jg.file-tree').focus()

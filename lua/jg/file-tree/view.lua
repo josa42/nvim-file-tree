@@ -225,7 +225,7 @@ function TreeView:update()
   -- 		p.Update()
   -- 	}
   --
-  self.lineData = l.renderVisibleLines('', self.provider:root():children())
+  self.lineData = l.renderVisibleLines('', self.provider.root:children())
 end
 
 function l.renderVisibleLines(prefix, items)

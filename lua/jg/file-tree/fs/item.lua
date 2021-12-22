@@ -2,31 +2,28 @@ local fs = require('jg.file-tree.fs.fs')
 local status = require('jg.file-tree.fs.status')
 local g = require('jg.file-tree.global')
 
-local FileItem = {}
-
-local iconChanged = '◎'
-local iconAdded = '⦿'
-local iconConflicted = '◉'
-
--- // Interface Assertions
--- var _ view.TreeItem = (*FileItem)(nil)
--- var _ view.Openable = (*FileItem)(nil)
--- var _ view.Statusable = (*FileItem)(nil)
+local Item = {}
 
 local iconThemes = {
   nerdfont = { '', 'ﱮ', '' },
   default = { '▸', '▾', '•' },
 }
 
-function FileItem:create(provider, path)
+local status_icons = {
+  [status.Changed] = '◎',
+  [status.Untracked] = '⦿',
+  [status.Conflicted] = '◉',
+}
+
+function Item:create(provider, path)
   local o = {
-    name = fs.basename(path), -- string
-    path = path, -- string
-    is_dir = fs.is_dir(path), -- bool
-    is_open = false, -- bool
-    childItems = {}, -- []view.TreeItem
-    matchIgnore = nil, -- *func(string) bool
-    provider = provider, -- *FileProvider
+    name = fs.basename(path),
+    path = path,
+    is_dir = fs.is_dir(path),
+    is_open = false,
+    children_cache = {},
+    matchIgnore = nil,
+    provider = provider,
   }
   setmetatable(o, self)
   self.__index = self
@@ -34,25 +31,26 @@ function FileItem:create(provider, path)
   return o
 end
 
-function FileItem:createChild(name)
-  return FileItem:create(self.provider, fs.join(self.path, name))
-end
-
-function FileItem:children()
+function Item:children()
   local names = fs.read_dir(self.path)
   local children = {}
 
   for _, name in ipairs(names) do
-    local found = false
-    for _, child in ipairs(self.childItems) do
-      if child.name == name then
-        table.insert(children, child)
-        found = true
-        break
+    local path = fs.join(self.path, name)
+
+    if not self.provider:is_ignored(path) then
+      local found = false
+      for _, child in ipairs(self.children_cache) do
+        if child.name == name then
+          table.insert(children, child)
+          found = true
+          break
+        end
       end
-    end
-    if not found then
-      table.insert(children, self:createChild(name))
+
+      if not found then
+        table.insert(children, Item:create(self.provider, path))
+      end
     end
   end
 
@@ -64,50 +62,36 @@ function FileItem:children()
     return a.is_dir
   end)
 
-  self.childItems = children
+  self.children_cache = children
 
-  local filtered = {}
-
-  for _, child in ipairs(self.childItems) do
-    -- TODO What's provider file status? Simplify it
-    -- i.provider.fileStatus.get(i.path, false) != FileStatusIgnored
-    if not self.provider:is_ignored(child.path) then
-      table.insert(filtered, child)
-    end
-  end
-
-  return filtered
+  return children
 end
 
-function FileItem:render(prefix)
-  local status = self:status()
-  local icon = self:icon()
-
-  if self.is_dir then
-    return prefix .. status .. ' ' .. icon .. ' ' .. self.name .. '/'
-  end
-  return prefix .. status .. ' ' .. icon .. ' ' .. self.name
+function Item:render(prefix)
+  return table.concat({
+    prefix,
+    self:status_icon(),
+    ' ',
+    self:icon(),
+    ' ',
+    self.name,
+    (self.is_dir and '/' or ''),
+  })
 end
---
--- // Openable Interface
---
--- function FileItem:IsOpenable() bool {
--- 	return i.is_dir
--- }
---
--- function FileItem:IsOpen() bool {
--- 	return i.is_open
--- }
---
--- function FileItem:Open() {
--- 	i.is_open = true
--- }
---
--- function FileItem:Close() {
--- 	i.is_open = false
--- }
---
-function FileItem:icon()
+
+function Item:open()
+  self.is_open = true
+end
+
+function Item:close()
+  self.is_open = false
+end
+
+function Item:toggle()
+  self.is_open = not self.is_open
+end
+
+function Item:icon()
   local icons = iconThemes['default']
   if g.get_var('nerdfont') then
     icons = iconThemes['nerdfont']
@@ -123,21 +107,17 @@ function FileItem:icon()
   --
   return icons[3]
 end
---
--- // statusable interface
---
-function FileItem:status()
+
+function Item:status_icon()
   local s = self.provider.status:get(self.path, self.is_dir)
 
-  if s == status.Changed then
-    return iconChanged
-  elseif s == status.Untracked then
-    return iconAdded
-  elseif s == status.Conflicted then
-    return iconConflicted
+  for key, icon in pairs(status_icons) do
+    if key == s then
+      return icon
+    end
   end
 
   return ' '
 end
 
-return FileItem
+return Item
