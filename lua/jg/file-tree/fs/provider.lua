@@ -1,5 +1,7 @@
+local g = require('jg.file-tree.global')
 local fs = require('jg.file-tree.fs.fs')
 local FileItem = require('jg.file-tree.fs.item')
+local watcher = require('jg.file-tree.fs.watcher')
 
 -- import (
 -- 	"log"
@@ -34,11 +36,24 @@ local FileProvider = {}
 function FileProvider:create()
   local o = {
     rootItem = nil,
+    watcher = nil,
   }
   setmetatable(o, self)
   self.__index = self
 
-  o.rootItem = FileItem:create(self, vim.fn.getcwd())
+  local dir = vim.fn.getcwd()
+
+  -- DirChanged
+
+  o.rootItem = FileItem:create(self, dir)
+  -- o.updater = watcher.watch(dir, function()
+  --   print('Update: ' .. os.time())
+  -- end)
+
+  o:watch(dir)
+  g.on('DirChanged', '*', function()
+    o:update()
+  end)
 
   return o
 end
@@ -54,20 +69,33 @@ end
 -- // Update Interface
 
 function FileProvider:update()
-  self.updateRootPath()
+  local dir = vim.fn.getcwd()
+  if self.rootItem.path ~= dir then
+    self.rootItem.path = dir
+    self:watch(dir)
+
+    if self.delegate ~= nil then
+      self.delegate:render()
+    end
+
+    return true
+  end
+
+  return false
   --
   -- 	// TODO refactor gitignore handling
   -- 	p.gitignore, _ = gitignore.NewGitignoreFromFile(filepath.Join(p.root.path, ".gitignore"))
 end
 
-function FileProvider:updateRootPath()
-  local path = vim.fn.getcwd()
-  if self.rootItem.path ~= path then
-    self.rootItem.path = path
-
-    return true
+function FileProvider:watch(dir)
+  if self.disposeUpdater ~= nil then
+    self.disposeUpdater()
   end
-  return false
+
+  local p = self
+  self.disposeUpdater = watcher.watch(dir, function()
+    p:update()
+  end)
 end
 
 function FileProvider:is_ignored(path)

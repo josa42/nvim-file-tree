@@ -19,7 +19,11 @@ function M.watch(dir, fn, opts)
     end)
   )
 
-  return w
+  return function()
+    w:stop()
+  end
+
+  -- return w
 end
 
 return M

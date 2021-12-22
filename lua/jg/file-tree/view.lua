@@ -82,6 +82,8 @@ function TreeView:create(provider)
   setmetatable(o, self)
   self.__index = self
 
+  provider.delegate = o
+
   return o
 end
 
@@ -100,7 +102,7 @@ function TreeView:attach(renderer)
   self.renderer = renderer
 end
 
-function TreeView:rerender()
+function TreeView:render()
   self.renderer:render()
 end
 
@@ -118,7 +120,7 @@ function TreeView:wrap_action(action)
       action(item)
     end
 
-    treeView:rerender()
+    treeView:render()
   end)
 
   return mapCmdTpl:format(cmd)
@@ -157,7 +159,7 @@ function TreeView:initialize(b)
   --     item.is_open = not item.is_open
   --   end
   --
-  --   treeView:rerender()
+  --   treeView:render()
   -- end)
 
   for key, fn in pairs(actions) do
