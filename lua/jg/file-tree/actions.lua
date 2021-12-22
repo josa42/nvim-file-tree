@@ -1,17 +1,5 @@
 local buf = require('jg.file-tree.buf')
-
-local function findWindow(path)
-  for _, w in ipairs(vim.api.nvim_list_wins()) do
-    local b = vim.api.nvim_win_get_buf(w)
-    local wp = vim.fn.expand('#' .. b .. ':p')
-
-    if wp == path then
-      return w
-    end
-  end
-
-  return -1
-end
+local win = require('jg.file-tree.win')
 
 local function open(cmd, item)
   require('jg.file-tree').unfocus()
@@ -21,7 +9,7 @@ end
 local function select(item)
   require('jg.file-tree').unfocus()
 
-  local w = findWindow(item.path)
+  local w = win.find_by_path(item.path)
   if w > 0 then
     vim.api.nvim_set_current_win(w)
   elseif buf.is_empty(0) then
