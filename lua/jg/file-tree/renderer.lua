@@ -18,10 +18,7 @@ function M.Renderer:render()
   end
 
   self.view:update()
-  -- if v, ok := r.view.(Updatable); ok {
-  -- 	v.Update()
-  -- }
-  --
+
   local lines = self.view:lines()
   local linesHash = vim.fn.json_encode(lines)
 
@@ -41,35 +38,14 @@ function M.Renderer:render()
 end
 
 function M.attach(b, view)
-  local vr = M.Renderer:create(b, view)
+  local r = M.Renderer:create(b, view)
 
-  -- 	b.Freeze()
-
-  -- 	bo.SetHidden(BufferHiddenHide)
-  -- 	bo.SetType(BufferTypeNoFile)
-  -- 	bo.SetListed(false)
-
-  view:attach(vr)
-  --
-  -- 	b.Options.SetFileType(view.FileType())
-  -- 	if v, ok := view.(Initializable); ok {
-  -- 		v.Initialize(b, b.api)
-  -- 	}
+  view:attach(r)
   view:initialize(b)
 
-  -- 	if v, ok := view.(disposables.Disposable); ok {
-  -- 		disposed := false
-  --
-  -- 		b.On(EventBufWipeout, func() {
-  -- 			disposed = true
-  -- 			v.Dispose()
-  -- 		})
+  r:render()
 
-  -- vim.cmd('autocmd BufWipeout <buffer=' .. b .. '> call v:lua.print("WIPE")')
-
-  vr:render()
-
-  return vr
+  return r
 end
 
 return M
