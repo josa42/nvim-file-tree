@@ -1,25 +1,12 @@
+local fn = require('jg.file-tree.fn')
+
 local M = {}
 
-function M.get_var(w, name)
-  local ok, result = pcall(vim.api.nvim_win_get_var, w, name)
-  if not ok then
-    return nil
-  end
-  return result
-end
+M.get_var = fn.wrap_pcall(vim.api.nvim_win_get_var)
+M.set_var = fn.wrap_pcall(vim.api.nvim_win_set_var)
 
-function M.set_var(w, name, value)
-  local ok, _ = pcall(vim.api.nvim_win_set_var, w, name, value)
-  return ok
-end
-
-function M.get_current()
-  return vim.api.nvim_get_current_win()
-end
-
-function M.set_current(win)
-  return vim.api.nvim_set_current_win(win)
-end
+M.get_current = vim.api.nvim_get_current_win
+M.set_current = vim.api.nvim_set_current_win
 
 function M.get_buf(win)
   return vim.api.nvim_win_get_buf(win)

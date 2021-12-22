@@ -1,35 +1,16 @@
+local fn = require('jg.file-tree.fn')
 local g = require('jg.file-tree.global')
 
 local M = {}
 
-function M.get_var(b, name)
-  local ok, result = pcall(vim.api.nvim_buf_get_var, b, name)
-  if not ok then
-    return nil
-  end
-  return result
-end
+M.get_var = fn.wrap_pcall(vim.api.nvim_buf_get_var)
+M.set_var = fn.wrap_pcall(vim.api.nvim_buf_set_var)
 
-function M.set_var(b, name, value)
-  local ok, _ = pcall(vim.api.nvim_buf_set_var, b, name, value)
-  return ok
-end
-
-function M.get_option(b, name)
-  local ok, result = pcall(vim.api.nvim_buf_get_option, b, name)
-  if not ok then
-    return nil
-  end
-  return result
-end
-
-function M.set_option(b, name, value)
-  local ok, _ = pcall(vim.api.nvim_buf_set_option, b, name, value)
-  return ok
-end
+M.get_option = fn.wrap_pcall(vim.api.nvim_buf_get_option)
+M.set_option = fn.wrap_pcall(vim.api.nvim_buf_set_option)
 
 function M.set_lines(b, lines)
-  local ok, e = pcall(vim.api.nvim_buf_set_lines, b, 0, -1, false, lines)
+  local ok = pcall(vim.api.nvim_buf_set_lines, b, 0, -1, false, lines)
   return ok
 end
 
@@ -61,9 +42,9 @@ function M.is_empty(b)
   end
 end
 
-function M.find(fn)
+function M.find(cb)
   for _, b in ipairs(vim.api.nvim_list_bufs()) do
-    local ok, result = pcall(fn, b)
+    local ok, result = pcall(cb, b)
     if ok and result then
       return b
     end

@@ -1,36 +1,21 @@
-local fn_wrap = require('jg.file-tree.fn').wrap
+local fn = require('jg.file-tree.fn')
 
 local M = {}
 
-function M.get_var(name)
-  local ok, result = pcall(vim.api.nvim_get_var, name)
-  if not ok then
-    return nil
-  end
-  return result
-end
+M.get_var = fn.wrap_pcall(vim.api.nvim_get_var)
+M.set_var = fn.wrap_pcall(vim.api.nvim_set_var)
 
-function M.set_var(name, value)
-  local ok, _ = pcall(vim.api.nvim_set_var, name, value)
-  return ok
-end
-
-function M.get_option(b, name)
-  local ok, result = pcall(vim.api.nvim_get_option, name)
-  if not ok then
-    return nil
-  end
-  return result
-end
+M.get_option = fn.wrap_pcall(vim.api.nvim_get_option)
+M.set_option = fn.wrap_pcall(vim.api.nvim_set_option)
 
 local onGroupTpl = 'jg.file-tree.au-%s'
 local onTpl = 'autocmd %s %s %s'
 local onIdx = 0
 
-function M.on(evt, pattern, fn)
+function M.on(evt, pattern, handler)
   onIdx = onIdx + 1
   local grp = onGroupTpl:format(onIdx)
-  local cmd, dispose = fn_wrap(fn)
+  local cmd, dispose = fn.wrap(handler)
 
   vim.cmd('augroup ' .. grp)
   vim.cmd(onTpl:format(evt, pattern, cmd))
