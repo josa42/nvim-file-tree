@@ -1,7 +1,12 @@
 local fs = require('jg.file-tree.fs.fs')
+local status = require('jg.file-tree.fs.status')
 local g = require('jg.file-tree.global')
 
 local FileItem = {}
+
+local iconChanged = '◎'
+local iconAdded = '⦿'
+local iconConflicted = '◉'
 
 -- // Interface Assertions
 -- var _ view.TreeItem = (*FileItem)(nil)
@@ -75,11 +80,7 @@ function FileItem:children()
 end
 
 function FileItem:render(prefix)
-  local status = ' '
-  -- 	if i, ok := l.item.(Statusable); ok {
-  -- 		status = i.Status()
-  -- 	}
-
+  local status = self:status()
   local icon = self:icon()
 
   if self.is_dir then
@@ -126,19 +127,16 @@ end
 -- // statusable interface
 --
 function FileItem:status()
-  -- 	switch i.provider.fileStatus.get(i.path, i.is_dir) {
-  -- 	case FileStatusChanged:
-  -- 		return view.ItemStatusChanged
-  --
-  -- 	case FileStatusUntracked:
-  -- 		return view.ItemStatusAdded
-  --
-  -- 	case FileStatusConflicted:
-  -- 		return view.ItemStatusConflicted
-  --
-  -- 	default:
-  -- 		return ' '
-  -- 	}
+  local s = self.provider.status:get(self.path, self.is_dir)
+
+  if s == status.Changed then
+    return iconChanged
+  elseif s == status.Untracked then
+    return iconAdded
+  elseif s == status.Conflicted then
+    return iconConflicted
+  end
+
   return ' '
 end
 

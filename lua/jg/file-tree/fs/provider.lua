@@ -2,6 +2,7 @@ local g = require('jg.file-tree.global')
 local fs = require('jg.file-tree.fs.fs')
 local FileItem = require('jg.file-tree.fs.item')
 local watcher = require('jg.file-tree.fs.watcher')
+local status = require('jg.file-tree.fs.status')
 
 -- import (
 -- 	"log"
@@ -45,15 +46,20 @@ function FileProvider:create()
 
   -- DirChanged
 
-  o.rootItem = FileItem:create(self, dir)
-  -- o.updater = watcher.watch(dir, function()
-  --   print('Update: ' .. os.time())
-  -- end)
+  o.status = status:create(dir)
+  o.status.delegate = o
+
+  o.rootItem = FileItem:create(o, dir)
+
+  o.status_reg = o.status
 
   o:watch(dir)
+
   g.on('DirChanged', '*', function()
     o:update()
   end)
+
+  o:update()
 
   return o
 end
@@ -70,21 +76,26 @@ end
 
 function FileProvider:update()
   local dir = vim.fn.getcwd()
+
   if self.rootItem.path ~= dir then
     self.rootItem.path = dir
     self:watch(dir)
+    self.status:set_dir(dir)
 
-    if self.delegate ~= nil then
-      self.delegate:render()
-    end
-
-    return true
   end
 
-  return false
+  self.status:update()
+  self:trigger_changed()
+
   --
   -- 	// TODO refactor gitignore handling
   -- 	p.gitignore, _ = gitignore.NewGitignoreFromFile(filepath.Join(p.root.path, ".gitignore"))
+end
+
+function FileProvider:trigger_changed()
+  if self.delegate ~= nil then
+    self.delegate:render()
+  end
 end
 
 function FileProvider:watch(dir)
@@ -110,9 +121,6 @@ function FileProvider:is_ignored(path)
   return false
 end
 
-function FileProvider:status()
-  return ' '
-end
 
 -- // Actionable Interface
 --

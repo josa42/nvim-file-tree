@@ -10,20 +10,13 @@ function M.watch(dir, fn, opts)
   opts = opts or {}
 
   local w = uv.new_fs_poll()
-  w:start(
-    dir,
-    opts.interval or 1000,
-    void(function()
-      scheduler()
-      fn()
-    end)
-  )
+  w:start(dir, opts.interval or 1000, function()
+    vim.schedule(fn)
+  end)
 
   return function()
     w:stop()
   end
-
-  -- return w
 end
 
 return M
