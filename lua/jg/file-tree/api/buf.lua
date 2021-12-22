@@ -1,5 +1,5 @@
-local fn = require('jg.file-tree.fn')
-local g = require('jg.file-tree.global')
+local fn = require('jg.file-tree.api.fn')
+local g = require('jg.file-tree.api.global')
 
 local M = {}
 
@@ -51,6 +51,13 @@ function M.find(cb)
   end
 
   return -1
+end
+
+local mapCmdTpl = ':%s<cr>'
+
+function M.set_keymap(b, key, handler, opts)
+  opts = opts or { silent = true, noremap = true }
+  vim.api.nvim_buf_set_keymap(b, 'n', key, mapCmdTpl:format(fn.wrap(handler)), opts)
 end
 
 return M

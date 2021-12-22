@@ -1,4 +1,4 @@
-local buf = require('jg.file-tree.buf')
+local buf = require('jg.file-tree.api.buf')
 
 local M = {}
 

@@ -1,9 +1,9 @@
 -- Source: https://github.com/josa42/nvim-filetree/blob/b0d980a03c10ad357c4959d783bf58e81c3d89e3/pkg/plugin.go
 
-local buf = require('jg.file-tree.buf')
-local tab = require('jg.file-tree.tab')
-local win = require('jg.file-tree.win')
-local g = require('jg.file-tree.global')
+local buf = require('jg.file-tree.api.buf')
+local tab = require('jg.file-tree.api.tab')
+local win = require('jg.file-tree.api.win')
+local g = require('jg.file-tree.api.global')
 local renderer = require('jg.file-tree.renderer')
 local TreeView = require('jg.file-tree.view')
 local FileProvider = require('jg.file-tree.fs.provider')

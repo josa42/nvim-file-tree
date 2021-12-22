@@ -1,4 +1,4 @@
-local g = require('jg.file-tree.global')
+local g = require('jg.file-tree.api.global')
 local fs = require('jg.file-tree.fs.fs')
 local Item = require('jg.file-tree.fs.item')
 local watcher = require('jg.file-tree.fs.watcher')

@@ -1,6 +1,6 @@
 local fs = require('jg.file-tree.fs.fs')
 local status = require('jg.file-tree.fs.status')
-local g = require('jg.file-tree.global')
+local g = require('jg.file-tree.api.global')
 
 local Item = {}
 

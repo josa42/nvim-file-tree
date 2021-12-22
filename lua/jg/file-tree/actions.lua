@@ -1,5 +1,5 @@
-local buf = require('jg.file-tree.buf')
-local win = require('jg.file-tree.win')
+local buf = require('jg.file-tree.api.buf')
+local win = require('jg.file-tree.api.win')
 
 local function open(cmd, item)
   require('jg.file-tree').unfocus()

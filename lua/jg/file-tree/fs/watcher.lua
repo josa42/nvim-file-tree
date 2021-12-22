@@ -1,5 +1,5 @@
 local uv = vim.loop
-local g = require('jg.file-tree.global')
+local g = require('jg.file-tree.api.global')
 
 local M = {}
 

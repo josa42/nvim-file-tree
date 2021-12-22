@@ -1,5 +1,5 @@
-local buf = require('jg.file-tree.buf')
-local fn_wrap = require('jg.file-tree.fn').wrap
+local buf = require('jg.file-tree.api.buf')
+local fn_wrap = require('jg.file-tree.api.fn').wrap
 local actions = require('jg.file-tree.actions')
 
 local l = {}
