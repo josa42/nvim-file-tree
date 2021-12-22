@@ -67,11 +67,11 @@ end
 
 function M:update()
   local s = self
-  run({ 'git', 'status', '--short' }, function(code, out)
+  run({ 'git', 'status', '--short', '--ignored' }, function(code, out)
     vim.schedule(function()
       local files = {}
       for _, line in ipairs(vim.fn.split(out, '\n')) do
-        files[line:sub(4)] = l.get_status(line)
+        files[l.trim_right(line:sub(4), '/')] = l.get_status(line)
       end
 
       if vim.fn.json_encode(s.files) ~= vim.fn.json_encode(files) then

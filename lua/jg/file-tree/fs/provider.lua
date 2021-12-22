@@ -51,8 +51,6 @@ function FileProvider:create()
 
   o.rootItem = FileItem:create(o, dir)
 
-  o.status_reg = o.status
-
   o:watch(dir)
 
   g.on('DirChanged', '*', function()
@@ -110,7 +108,7 @@ end
 
 function FileProvider:is_ignored(path)
   -- TODO handle this better
-  if fs.basename(path) == '.git' then
+  if fs.basename(path) == '.git' or self.status:get(path, false) == status.Ignored then
     return true
   end
 
