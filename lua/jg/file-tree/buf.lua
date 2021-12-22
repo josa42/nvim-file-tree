@@ -1,4 +1,4 @@
-local fn_wrap = require('jg.file-tree.fn').wrap
+local g = require('jg.file-tree.global')
 
 local M = {}
 
@@ -40,16 +40,10 @@ function M.close(b)
   end
 end
 
-local onTpl = 'autocmd %s <buffer=%s> %s'
+local onTpl = '<buffer=%s>'
 
 function M.on(b, evt, fn)
-  local cmd, dispose = fn_wrap(fn)
-  vim.cmd(onTpl:format(evt, b, cmd))
-
-  return function()
-    -- TODO dispose autocmd
-    dispose()
-  end
+  return g.on(evt, onTpl:format(b), fn)
 end
 
 function M.is_empty(b)
