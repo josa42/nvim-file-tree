@@ -21,16 +21,23 @@ function M.Renderer:render()
   -- if v, ok := r.view.(Updatable); ok {
   -- 	v.Update()
   -- }
+  --
+  local lines = self.view:lines()
+  local linesHash = vim.fn.json_encode(lines)
 
-  buf.set_option(self.buf, 'modifiable', true)
-  buf.set_option(self.buf, 'readonly', false)
-  local c = vim.api.nvim_win_get_cursor(0)
+  if self.linesHash ~= linesHash then
+    buf.set_option(self.buf, 'modifiable', true)
+    buf.set_option(self.buf, 'readonly', false)
+    local c = vim.api.nvim_win_get_cursor(0)
 
-  buf.set_lines(self.buf, self.view:lines())
+    buf.set_lines(self.buf, self.view:lines())
 
-  buf.set_option(self.buf, 'modifiable', false)
-  buf.set_option(self.buf, 'readonly', true)
-  vim.api.nvim_win_set_cursor(0, c)
+    buf.set_option(self.buf, 'modifiable', false)
+    buf.set_option(self.buf, 'readonly', true)
+    vim.api.nvim_win_set_cursor(0, c)
+
+    self.linesHash = linesHash
+  end
 end
 
 function M.attach(b, view)
