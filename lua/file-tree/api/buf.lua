@@ -1,5 +1,5 @@
-local fn = require('jg.file-tree.api.fn')
-local g = require('jg.file-tree.api.global')
+local fn = require('file-tree.api.fn')
+local g = require('file-tree.api.global')
 
 local M = {}
 

@@ -1,1 +1,1 @@
-require('jg.file-tree').setup()
+require('file-tree').setup()

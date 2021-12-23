@@ -1,4 +1,4 @@
-local fn = require('jg.file-tree.api.fn')
+local fn = require('file-tree.api.fn')
 
 local M = {}
 

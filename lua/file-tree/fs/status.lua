@@ -1,4 +1,4 @@
-local run = require('jg.file-tree.exec').run
+local run = require('file-tree.exec').run
 
 local status = {}
 local l = {}

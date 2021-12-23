@@ -1,8 +1,8 @@
-local g = require('jg.file-tree.api.global')
-local fs = require('jg.file-tree.fs.fs')
-local Item = require('jg.file-tree.fs.item')
-local watcher = require('jg.file-tree.fs.watcher')
-local status = require('jg.file-tree.fs.status')
+local g = require('file-tree.api.global')
+local fs = require('file-tree.fs.fs')
+local Item = require('file-tree.fs.item')
+local watcher = require('file-tree.fs.watcher')
+local status = require('file-tree.fs.status')
 
 local Provider = {}
 

@@ -1,13 +1,13 @@
-local buf = require('jg.file-tree.api.buf')
-local win = require('jg.file-tree.api.win')
+local buf = require('file-tree.api.buf')
+local win = require('file-tree.api.win')
 
 local function open(cmd, item)
-  require('jg.file-tree').unfocus()
+  require('file-tree').unfocus()
   vim.cmd(cmd .. ' ' .. item.path)
 end
 
 local function select(item)
-  require('jg.file-tree').unfocus()
+  require('file-tree').unfocus()
 
   local w = win.find_by_path(item.path)
   if w > 0 then
@@ -57,7 +57,7 @@ local actions = {
       item:open()
     else
       open('edit', item)
-      require('jg.file-tree').focus()
+      require('file-tree').focus()
     end
   end,
   ['t'] = function(item)
@@ -76,7 +76,7 @@ local actions = {
     end
   end,
   ['<ESC>'] = function()
-    require('jg.file-tree').unfocus()
+    require('file-tree').unfocus()
   end,
 }
 

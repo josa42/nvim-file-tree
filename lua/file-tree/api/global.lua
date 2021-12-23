@@ -1,4 +1,4 @@
-local fn = require('jg.file-tree.api.fn')
+local fn = require('file-tree.api.fn')
 
 local M = {}
 
@@ -8,7 +8,7 @@ M.set_var = fn.wrap_pcall(vim.api.nvim_set_var)
 M.get_option = fn.wrap_pcall(vim.api.nvim_get_option)
 M.set_option = fn.wrap_pcall(vim.api.nvim_set_option)
 
-local onGroupTpl = 'jg.file-tree.au-%s'
+local onGroupTpl = 'file-tree.au-%s'
 local onTpl = 'autocmd %s %s %s'
 local onIdx = 0
 

@@ -2,7 +2,7 @@ local M = {}
 
 M.handler = {}
 
-local cmdTpl = 'lua require("jg.file-tree.api.fn").handler[%s]()'
+local cmdTpl = 'lua require("file-tree.api.fn").handler[%s]()'
 
 function M.wrap(fn)
   assert(fn ~= nil, 'fn must be defined')

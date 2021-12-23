@@ -1,5 +1,5 @@
-local buf = require('jg.file-tree.api.buf')
-local actions = require('jg.file-tree.actions')
+local buf = require('file-tree.api.buf')
+local actions = require('file-tree.actions')
 
 local l = {}
 
