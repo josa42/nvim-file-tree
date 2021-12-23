@@ -154,7 +154,7 @@ function l.create_tree_buffer()
     M.tree_view = TreeView:create(M.provider)
   end
 
-  M.provider.delegate = renderer.attach(b, M.tree_view)
+  M.provider.renderer = renderer.attach(b, M.tree_view)
 
   g.set_var(var_tree_buf, b)
   g.set_var(var_is_opening, false)

@@ -34,6 +34,7 @@ function M.run(opts, on_done)
     args = args,
     stdio = { stdin_pipe, stdout_pipe, stderr_pipe },
     cwd = opts.cwd,
+    env = opts.env,
   }, function(code)
     stdout_close()
     stderr_close()

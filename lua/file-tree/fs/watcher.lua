@@ -50,17 +50,27 @@ function M:start()
   end
 
   local on_change = self.on_change
-
-  local w = uv.new_fs_poll()
-  w:start(self.dir, self.interval, function()
-    vim.schedule(on_change)
-  end)
-
-  self.dispose_polling = function()
-    w:stop()
+  local handler = function(typ)
+    return function()
+      vim.schedule(function()
+        on_change(typ)
+      end)
+    end
   end
 
-  self.on_change()
+  local w_files = uv.new_fs_poll()
+  w_files:start(self.dir, self.interval, handler('file'))
+
+  -- TODO find correct git root
+  local w_git = uv.new_fs_poll()
+  w_git:start(self.dir .. '/.git', self.interval, handler('git'))
+
+  self.dispose_polling = function()
+    w_files:stop()
+    w_git:stop()
+  end
+
+  self.on_change('init')
 end
 
 function M:dispose()

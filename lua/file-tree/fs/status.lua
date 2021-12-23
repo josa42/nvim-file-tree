@@ -60,7 +60,7 @@ end
 
 function status:update()
   local s = self
-  run({ 'git', 'status', '--short', '--ignored' }, function(_, out)
+  run({ 'git', 'status', '--porcelain', '--ignored', env = { 'GIT_OPTIONAL_LOCKS=0' } }, function(_, out)
     vim.schedule(function()
       local files = {}
       for _, line in ipairs(vim.fn.split(out, '\n')) do
