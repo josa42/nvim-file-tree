@@ -2,13 +2,39 @@ local uv = vim.loop
 local create = require('file-tree.utils.create')
 local g = require('file-tree.api.global')
 
+local log = require('file-tree.logger').log
+
+local interval = 1000
+
+local Listener = {}
+
+function Listener:create(path, handler)
+  self = create(self, { path = path })
+
+  log('[polling] start: ' .. path)
+  self.poll = uv.new_fs_poll()
+  self.poll:start(path, interval, function()
+    -- log('change in: ' .. path)
+    handler(path)
+  end)
+
+  return self
+end
+
+function Listener:dispose()
+  log('[polling] stop:  ' .. self.path)
+  self.poll:stop()
+  self.poll = nil
+end
+
 local M = {}
 
 function M:create(delegate, opts)
-  self = create(self)
+  self = create(self, {
+    listeners = {},
+  })
 
-  self.w_files = uv.new_fs_poll()
-  self.w_git = uv.new_fs_poll()
+  self:add(opts.dir)
 
   self.on_change = function(typ)
     vim.schedule(function()
@@ -16,63 +42,44 @@ function M:create(delegate, opts)
     end)
   end
 
-  self.interval = opts.interval or 1000
-  self.dir = opts.dir
-  self.git_root = opts.git_root
-
-  self.dispose_autocmd = g.on('DirChanged', '*', function()
-    self.on_change('dir')
-  end)
-
-  self:start()
-
   return self
 end
 
-function M:set_path(dir)
-  if self.dir ~= dir then
-    self.dir = dir
-    self:start()
+--------------------------------------------------------------------------------
+-- new API
+
+function M:has(path)
+  return self.listeners[path] ~= nil
+end
+
+function M:add(path)
+  assert(path ~= nil, 'path must be set')
+  if not self:has(path) then
+    self.listeners[path] = Listener:create(path, function()
+      self.on_change('file')
+    end)
   end
 end
 
-function M:set_git_root(git_root)
-  if self.git_root ~= git_root then
-    self.git_root = git_root
-    self:start()
+function M:remove(path)
+  assert(path ~= nil, 'path must be set')
+  if self:has(path) then
+    self.listeners[path]:dispose()
+    self.listeners[path] = nil
   end
 end
 
-function M:start()
-  if self.dispose_polling ~= nil then
-    self.dispose_polling()
+function M:reset()
+  for _, listener in pairs(self.listeners) do
+    listener:dispose()
   end
-
-  local on_change = self.on_change
-  local handler = function(typ)
-    return function()
-      on_change(typ)
-    end
-  end
-
-  if self.dir ~= nil then
-    self.w_files:start(self.dir, self.interval, handler('file'))
-  end
-
-  if self.git_root ~= nil then
-    self.w_git:start(self.git_root .. '/.git', self.interval, handler('git'))
-  end
-
-  self.dispose_polling = function()
-    self.w_files:stop()
-    self.w_git:stop()
-  end
+  self.listeners = {}
 end
 
 function M:dispose()
-  if self.dispose ~= nil then
-    self.dispose()
-  end
+  self:reset()
+
+  -- old
   if self.dispose_autocmd ~= nil then
     self.dispose_autocmd()
   end
