@@ -55,6 +55,15 @@ end
 
 function TreeView:update()
   self.lines = l.get_visible_lines('', self.provider.root:children())
+
+  local paths = {}
+  for _, line in ipairs(self.lines) do
+    if line.item.is_dir and line.item.is_open then
+      table.insert(paths, line.item.path)
+    end
+  end
+
+  self.provider:set_watch_paths(paths)
 end
 
 function l.get_visible_lines(prefix, items)

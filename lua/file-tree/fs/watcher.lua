@@ -69,6 +69,17 @@ function M:remove(path)
   end
 end
 
+function M:set(paths)
+  for path in pairs(self.listeners) do
+    if not vim.tbl_contains(paths, path) then
+      self:remove(path)
+    end
+  end
+  for i, path in ipairs(paths) do
+    self:add(path)
+  end
+end
+
 function M:reset()
   for _, listener in pairs(self.listeners) do
     listener:dispose()

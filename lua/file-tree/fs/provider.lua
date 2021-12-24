@@ -45,20 +45,15 @@ function Provider:trigger_changed()
 end
 
 function Provider:is_ignored(path)
-  if fs.basename(path) == '.git' or self.status:get(path, false) == status.Ignored then
-    return true
-  end
-
-  return false
+  return fs.basename(path) == '.git' or self.status:get(path, false) == status.Ignored
 end
 
 function Provider:update_dir(dir)
   log('update_dir: ' .. self.root.path .. ' => ' .. dir)
   if dir ~= self.root.path then
-    self.watcher:add(dir)
-    self.watcher:remove(self.root.path)
     self.root.path = dir
     self:trigger_changed()
+    self:update_watcher()
   end
 end
 
@@ -68,13 +63,9 @@ function Provider:update_git_root()
 
     local git_dir = git_root ~= nil and git_root .. '/.git' or nil
     if self.git_dir ~= git_dir then
-      self.watcher:add(git_dir)
-      if self.git_dir ~= nil then
-        self.watcher:remove(self.git_dir)
-      end
-
       self.git_dir = git_dir
       self.status:set_git_root(git_root)
+      self:update_watcher()
     end
   end)
 end
@@ -83,6 +74,21 @@ function Provider:get_git_root(dir, cb)
   run({ 'git', 'rev-parse', '--show-toplevel', cwd = dir }, function(_, out)
     cb(out ~= nil and out:gsub('%s+$', '') or nil)
   end)
+end
+
+function Provider:set_watch_paths(paths)
+  self.watch_paths = paths
+  self:update_watcher()
+end
+
+function Provider:update_watcher()
+  local paths = vim.tbl_extend('keep', {}, self.watch_paths)
+  table.insert(paths, self.root.path)
+  if self.git_dir ~= nil then
+    table.insert(paths, self.git_dir)
+  end
+
+  self.watcher:set(paths)
 end
 
 return Provider
