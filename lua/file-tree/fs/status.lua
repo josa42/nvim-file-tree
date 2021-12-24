@@ -38,10 +38,8 @@ local expUntracked = vim.regex('\\v^\\?\\?')
 -- ignored
 local expIgnored = vim.regex('\\v^\\!\\!')
 
-function status:create(dir, delegate)
+function status:create(delegate)
   local o = {}
-
-  assert(dir ~= nil, 'dir must be set')
 
   setmetatable(o, self)
   self.__index = self
@@ -49,29 +47,43 @@ function status:create(dir, delegate)
   o.files = {}
   o.delegate = delegate
 
-  o:set_dir(dir)
-
   return o
 end
 
-function status:set_dir(dir)
-  self.dir = l.trim_right(dir, '/')
+function status:set_git_root(git_root)
+  if git_root ~= nil then
+    git_root = l.trim_right(git_root, '/')
+  end
+  if self.git_root ~= git_root then
+    self.git_root = git_root
+    self:update()
+  end
 end
 
-function status:update(git_root)
-  local s = self
+function status:update()
+  if self.git_root == nil then
+    self.files = {}
+    return
+  end
+
+  local git_root = self.git_root
   run(
-    { 'git', 'status', '--porcelain', '--ignored', env = { 'GIT_OPTIONAL_LOCKS=0' }, cwd = git_root },
+    { 'git', 'status', '--porcelain', '--ignored', env = { 'GIT_OPTIONAL_LOCKS=0' }, cwd = self.git_root },
     function(_, out)
       vim.schedule(function()
-        local files = {}
-        for _, line in ipairs(vim.fn.split(out, '\n')) do
-          files[l.trim_right(line:sub(4), '/')] = l.get_status(line)
+        if self.git_root ~= git_root then
+          return
         end
 
-        if vim.fn.json_encode(s.files) ~= vim.fn.json_encode(files) then
-          s.files = files
-          if s.delegate ~= nil then
+        local files = {}
+        for _, line in ipairs(vim.fn.split(out, '\n')) do
+          local path = self.git_root .. '/' .. l.trim_right(line:sub(4), '/')
+          files[path] = l.get_status(line)
+        end
+
+        if vim.fn.json_encode(self.files) ~= vim.fn.json_encode(files) then
+          self.files = files
+          if self.delegate ~= nil then
             self.delegate:trigger_changed()
           end
         end
@@ -82,7 +94,6 @@ end
 
 function status:get(path, is_dir)
   path = l.trim_right(path, '/')
-  path = l.strip_prefix(path, self.dir .. '/')
 
   if is_dir then
     for _, s in ipairs({ status.Conflicted, status.Changed, status.Untracked }) do

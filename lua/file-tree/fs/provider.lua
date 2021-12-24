@@ -15,7 +15,7 @@ function Provider:create()
 
   local dir = vim.fn.getcwd()
 
-  o.status = status:create(dir, o)
+  o.status = status:create(o)
   o.root = Item:create(o, dir)
   o.watcher = watcher:create(o, { dir = dir })
 
@@ -31,9 +31,7 @@ function Provider:update()
     self:update_git_root()
   end
 
-  if self.git_root ~= nil then
-    self.status:update(self.git_root)
-  end
+  self.status:update()
 end
 
 function Provider:trigger_changed()
@@ -61,7 +59,7 @@ function Provider:update_git_root()
     if self.git_root ~= git_root then
       self.git_root = git_root
       self.watcher:set_git_root(git_root)
-      self.status:update(git_root)
+      self.status:set_git_root(git_root)
     end
   end)
 end
