@@ -3,6 +3,7 @@ local fs = require('file-tree.fs.fs')
 local Item = require('file-tree.fs.item')
 local watcher = require('file-tree.fs.watcher')
 local status = require('file-tree.fs.status')
+local run = require('file-tree.exec').run
 
 local Provider = {}
 
@@ -16,24 +17,23 @@ function Provider:create()
 
   o.status = status:create(dir, o)
   o.root = Item:create(o, dir)
+  o.watcher = watcher:create(o, { dir = dir })
 
-  o.watcher = watcher:create(function()
-    o:update()
-  end)
+  o:update_git_root()
 
   return o
 end
 
 function Provider:update()
   local dir = vim.fn.getcwd()
-
   if self.root.path ~= dir then
-    self.root.path = dir
-    self.status:set_dir(dir)
+    self:update_dir(dir)
+    self:update_git_root()
   end
 
-  self.status:update()
-  self:trigger_changed()
+  if self.git_root ~= nil then
+    self.status:update(self.git_root)
+  end
 end
 
 function Provider:trigger_changed()
@@ -48,6 +48,28 @@ function Provider:is_ignored(path)
   end
 
   return false
+end
+
+function Provider:update_dir(dir)
+  self.root.path = dir
+  self.watcher:set_path(dir)
+  self:trigger_changed()
+end
+
+function Provider:update_git_root()
+  self:get_git_root(self.root.path, function(git_root)
+    if self.git_root ~= git_root then
+      self.git_root = git_root
+      self.watcher:set_git_root(git_root)
+      self.status:update(git_root)
+    end
+  end)
+end
+
+function Provider:get_git_root(dir, cb)
+  run({ 'git', 'rev-parse', '--show-toplevel', cwd = dir }, function(_, out)
+    cb(out ~= nil and out:gsub('%s+$', '') or nil)
+  end)
 end
 
 return Provider

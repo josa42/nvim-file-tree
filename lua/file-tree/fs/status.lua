@@ -58,23 +58,26 @@ function status:set_dir(dir)
   self.dir = l.trim_right(dir, '/')
 end
 
-function status:update()
+function status:update(git_root)
   local s = self
-  run({ 'git', 'status', '--porcelain', '--ignored', env = { 'GIT_OPTIONAL_LOCKS=0' } }, function(_, out)
-    vim.schedule(function()
-      local files = {}
-      for _, line in ipairs(vim.fn.split(out, '\n')) do
-        files[l.trim_right(line:sub(4), '/')] = l.get_status(line)
-      end
-
-      if vim.fn.json_encode(s.files) ~= vim.fn.json_encode(files) then
-        s.files = files
-        if s.delegate ~= nil then
-          self.delegate:trigger_changed()
+  run(
+    { 'git', 'status', '--porcelain', '--ignored', env = { 'GIT_OPTIONAL_LOCKS=0' }, cwd = git_root },
+    function(_, out)
+      vim.schedule(function()
+        local files = {}
+        for _, line in ipairs(vim.fn.split(out, '\n')) do
+          files[l.trim_right(line:sub(4), '/')] = l.get_status(line)
         end
-      end
-    end)
-  end)
+
+        if vim.fn.json_encode(s.files) ~= vim.fn.json_encode(files) then
+          s.files = files
+          if s.delegate ~= nil then
+            self.delegate:trigger_changed()
+          end
+        end
+      end)
+    end
+  )
 end
 
 function status:get(path, is_dir)
