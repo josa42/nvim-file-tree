@@ -4,24 +4,22 @@ local Item = require('file-tree.fs.item')
 local watcher = require('file-tree.fs.watcher')
 local status = require('file-tree.fs.status')
 local run = require('file-tree.exec').run
+local create = require('file-tree.utils.create')
 
 local Provider = {}
 
 function Provider:create()
-  local o = {}
-
-  setmetatable(o, self)
-  self.__index = self
+  self = create(self)
 
   local dir = vim.fn.getcwd()
 
-  o.status = status:create(o)
-  o.root = Item:create(o, dir)
-  o.watcher = watcher:create(o, { dir = dir })
+  self.status = status:create(self)
+  self.root = Item:create(self, dir)
+  self.watcher = watcher:create(self, { dir = dir })
 
-  o:update_git_root()
+  self:update_git_root()
 
-  return o
+  return self
 end
 
 function Provider:update()

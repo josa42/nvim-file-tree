@@ -1,49 +1,32 @@
 local uv = vim.loop
+local create = require('file-tree.utils.create')
 local g = require('file-tree.api.global')
 
 local M = {}
 
-function M.watch(dir, fn, opts)
-  opts = opts or {}
-
-  local w = uv.new_fs_poll()
-  w:start(dir, opts.interval or 1000, function()
-    vim.schedule(fn)
-  end)
-
-  return function()
-    w:stop()
-  end
-end
-
 function M:create(delegate, opts)
-  opts = opts or {}
+  self = create(self)
 
-  local o = {}
+  self.w_files = uv.new_fs_poll()
+  self.w_git = uv.new_fs_poll()
 
-  setmetatable(o, self)
-  self.__index = self
-
-  o.w_files = uv.new_fs_poll()
-  o.w_git = uv.new_fs_poll()
-
-  o.on_change = function(typ)
+  self.on_change = function(typ)
     vim.schedule(function()
       delegate:update(typ)
     end)
   end
 
-  o.interval = opts.interval or 1000
-  o.dir = opts.dir
-  o.git_root = opts.git_root
+  self.interval = opts.interval or 1000
+  self.dir = opts.dir
+  self.git_root = opts.git_root
 
-  o.dispose_autocmd = g.on('DirChanged', '*', function()
-    o.on_change('dir')
+  self.dispose_autocmd = g.on('DirChanged', '*', function()
+    self.on_change('dir')
   end)
 
-  o:start()
+  self:start()
 
-  return o
+  return self
 end
 
 function M:set_path(dir)

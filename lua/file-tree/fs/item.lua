@@ -1,6 +1,7 @@
 local fs = require('file-tree.fs.fs')
 local status = require('file-tree.fs.status')
 local g = require('file-tree.api.global')
+local create = require('file-tree.utils.create')
 
 local Item = {}
 
@@ -16,7 +17,7 @@ local status_icons = {
 }
 
 function Item:create(provider, path)
-  local o = {
+  return create(self, {
     name = fs.basename(path),
     path = path,
     is_dir = fs.is_dir(path),
@@ -24,11 +25,7 @@ function Item:create(provider, path)
     children_cache = {},
     matchIgnore = nil,
     provider = provider,
-  }
-  setmetatable(o, self)
-  self.__index = self
-
-  return o
+  })
 end
 
 function Item:children()

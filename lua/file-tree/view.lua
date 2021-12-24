@@ -1,5 +1,6 @@
 local buf = require('file-tree.api.buf')
 local actions = require('file-tree.actions')
+local create = require('file-tree.utils.create')
 
 local l = {}
 
@@ -8,14 +9,10 @@ local levelPrefix = '  '
 local TreeView = {}
 
 function TreeView:create(provider)
-  local o = {
+  return create(self, {
     provider = provider,
     lines = {},
-  }
-  setmetatable(o, self)
-  self.__index = self
-
-  return o
+  })
 end
 
 function TreeView:attach(renderer)

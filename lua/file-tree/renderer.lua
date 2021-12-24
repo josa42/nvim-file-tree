@@ -1,14 +1,12 @@
 local buf = require('file-tree.api.buf')
+local create = require('file-tree.utils.create')
 
 local M = {}
 
 M.Renderer = {}
 
 function M.Renderer:create(b, view)
-  local o = { buf = b, view = view }
-  setmetatable(o, self)
-  self.__index = self
-  return o
+  return create(self, { buf = b, view = view })
 end
 
 function M.Renderer:render()
