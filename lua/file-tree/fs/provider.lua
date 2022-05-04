@@ -25,6 +25,12 @@ function Provider:create()
     end,
   })
 
+  vim.api.nvim_create_autocmd('FocusGained', {
+    callback = function()
+      self:update()
+    end,
+  })
+
   self:update_dir(dir)
   self:update_git_root()
 
