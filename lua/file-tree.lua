@@ -24,9 +24,9 @@ function M.setup()
   g.set_var(var_is_opening, false)
   g.set_var(var_tree_buf, -1)
 
-  g.on('WinEnter', '*', M.on_enter_sync_state)
-  g.on('BufEnter', '*', M.on_leave_close_last_tree)
-  g.on('WinLeave', '*', M.on_leave_unfocus_tree)
+  vim.api.nvim_create_autocmd('WinEnter', { callback = M.on_enter_sync_state })
+  vim.api.nvim_create_autocmd('BufEnter', { callback = M.on_leave_close_last_tree })
+  vim.api.nvim_create_autocmd('WinLeave', { callback = M.on_leave_unfocus_tree })
 end
 
 --------------------------------------------------------------------------------

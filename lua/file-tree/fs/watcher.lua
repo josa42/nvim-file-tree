@@ -89,11 +89,6 @@ end
 
 function M:dispose()
   self:reset()
-
-  -- old
-  if self.dispose_autocmd ~= nil then
-    self.dispose_autocmd()
-  end
 end
 
 return M

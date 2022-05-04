@@ -1,4 +1,3 @@
-local g = require('file-tree.api.global')
 local fs = require('file-tree.fs.fs')
 local Item = require('file-tree.fs.item')
 local watcher = require('file-tree.fs.watcher')
@@ -19,10 +18,12 @@ function Provider:create()
   self.root = Item:create(self, dir)
   self.watcher = watcher:create(self, { dir = dir })
 
-  self.dispose_autocmd = g.on('DirChanged', '*', function()
-    self:update_dir(vim.fn.getcwd())
-    self:update_git_root()
-  end)
+  vim.api.nvim_create_autocmd('DirChanged', {
+    callback = function()
+      self:update_dir(vim.fn.getcwd())
+      self:update_git_root()
+    end,
+  })
 
   self:update_dir(dir)
   self:update_git_root()

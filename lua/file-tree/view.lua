@@ -35,13 +35,16 @@ function TreeView:wrap_action(action)
 end
 
 function TreeView:initialize(b)
-  buf.on(b, 'CursorMoved', function()
-    local c = vim.api.nvim_win_get_cursor(0)
-    if c[2] ~= 0 then
-      vim.api.nvim_win_set_cursor(0, { c[1], 0 })
-    end
-  end)
-  --
+  vim.api.nvim_create_autocmd('CursorMoved', {
+    buffer = b,
+    callback = function()
+      local c = vim.api.nvim_win_get_cursor(0)
+      if c[2] ~= 0 then
+        vim.api.nvim_win_set_cursor(0, { c[1], 0 })
+      end
+    end,
+  })
+
   local nopKeyMaps = { 'i', 'a', 'v', 'V', '<C>', '<C-v>', '<C-0>', 'h', 'l', '<Left>', '<Right>', '0', '$', '^' }
   for _, k in ipairs(nopKeyMaps) do
     buf.set_keymap(b, '', k, '<nop>')

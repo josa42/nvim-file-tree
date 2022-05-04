@@ -29,12 +29,6 @@ function M.set_name(b, name)
   vim.api.nvim_buf_set_name(b, name)
 end
 
-local onTpl = '<buffer=%s>'
-
-function M.on(b, evt, handler)
-  return g.on(evt, onTpl:format(b), handler)
-end
-
 function M.is_empty(b)
   if b ~= -1 then
     local lines = vim.api.nvim_buf_get_lines(b, 0, -1, false) or { '' }

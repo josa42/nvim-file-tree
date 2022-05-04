@@ -14,7 +14,7 @@ function M.wrap(fn)
     M.handler[idx] = nil
   end
 
-  return cmdTpl:format(#M.handler), dispose
+  return cmdTpl:format(idx), dispose
 end
 
 function M.wrap_pcall(fn)
