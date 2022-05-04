@@ -47,20 +47,4 @@ function M.find(cb)
   return -1
 end
 
-local mapCmdTpl = ':%s<cr>'
-
-function M.set_keymap(b, mode, key, handler, opts)
-  opts = opts or { silent = true, noremap = true }
-
-  if type(handler) ~= 'string' then
-    handler = mapCmdTpl:format(fn.wrap(handler))
-  end
-
-  vim.api.nvim_buf_set_keymap(b, mode, key, handler, opts)
-
-  return function()
-    -- TODO dispose
-  end
-end
-
 return M

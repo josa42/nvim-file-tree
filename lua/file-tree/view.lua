@@ -45,14 +45,15 @@ function TreeView:initialize(b)
     end,
   })
 
+  local nop = function() end
+
   local nopKeyMaps = { 'i', 'a', 'v', 'V', '<C>', '<C-v>', '<C-0>', 'h', 'l', '<Left>', '<Right>', '0', '$', '^' }
-  for _, k in ipairs(nopKeyMaps) do
-    buf.set_keymap(b, '', k, '<nop>')
+  for _, key in ipairs(nopKeyMaps) do
+    vim.keymap.set('', key, nop, { silent = true, noremap = true, buffer = b })
   end
 
   for key, fn in pairs(actions) do
-    -- TODO handle disposing
-    buf.set_keymap(b, 'n', key, self:wrap_action(fn))
+    vim.keymap.set('n', key, self:wrap_action(fn), { silent = true, noremap = true, buffer = b })
   end
 end
 
