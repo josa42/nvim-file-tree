@@ -6,6 +6,16 @@ local l = {}
 
 local levelPrefix = '  '
 
+function scroll_to(line)
+  local diff = line - vim.fn.line('w0')
+
+  if diff < 0 then
+    vim.cmd([[exec "normal! ]] .. math.abs(diff) .. [[\<C-y>"]])
+  elseif diff > 0 then
+    vim.cmd([[exec "normal! ]] .. diff .. [[\<C-e>"]])
+  end
+end
+
 local TreeView = {}
 
 function TreeView:create(provider)
@@ -42,8 +52,24 @@ function TreeView:initialize(b)
       if c[2] ~= 0 then
         vim.api.nvim_win_set_cursor(0, { c[1], 0 })
       end
+
+      vim.b.__file_tree_pos = { cursor = c[1], line = vim.fn.line('w0') }
     end,
   })
+
+  vim.api.nvim_create_autocmd({ 'WinEnter' }, {
+    callback = function()
+      if vim.b.__file_tree_pos ~= nil then
+        vim.api.nvim_win_set_cursor(0, { vim.b.__file_tree_pos.cursor, 0 })
+        scroll_to(vim.b.__file_tree_pos.line)
+      end
+    end,
+  })
+
+  -- vim.api.nvim_create_autocmd('WinScrolled', {
+  --   callback = function()
+  --   end,
+  -- })
 
   local nop = function() end
 
