@@ -47,12 +47,12 @@ local actions = {
       open('edit', item)
     end
   end,
-  ['<left>'] = function(item)
+  ['h'] = function(item)
     if item.is_dir then
       item:close()
     end
   end,
-  ['<right>'] = function(item)
+  ['l'] = function(item)
     if item.is_dir then
       item:open()
     else
