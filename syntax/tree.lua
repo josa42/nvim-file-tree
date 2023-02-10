@@ -3,9 +3,13 @@ vim.cmd.syn('match', 'TreeDirIcon', [[/[󰉋󰝰▸▾•]/]], 'containedin=Tree
 vim.cmd.syn('match', 'TreeFileIcon', [[/[󰈔•]/]], 'containedin=TreeIcon')
 
 vim.cmd.syn('match', 'TreeName', [[/\(^\(  \)*. [󰉋󰝰󰈔▸▾•] \)\@<=.*$/]])
+
 vim.cmd.syn('match', 'TreeDirName', [[/\(^\(  \)*. [󰉋󰝰▸▾•] \)\@<=.*$/]])
 vim.cmd.syn('match', 'TreeFileName', [[/\(^\(  \)*. [󰈔•] \)\@<=.*$/]])
+
 vim.cmd.syn('match', 'TreeDirSlash', [[#/#]], 'containedin=TreeName,TreeDirName')
+
+vim.cmd.syn('match', 'TreeFileExt', [[/\.\([a-z]\{2,4\}\)$/]], 'containedin=TreeName,TreeFileName')
 
 vim.cmd.syn('match', 'TreeStatus', [[/\(^\(  \)*\)\@<=[^ ]\([^ ] \)\@=/]])
 vim.cmd.syn('match', 'TreeStatusChanged', [[/\(^\(  \)*\)\@<=◎/  containedin=TreeStatus]])
