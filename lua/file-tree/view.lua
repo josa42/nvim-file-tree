@@ -1,4 +1,3 @@
-local buf = require('file-tree.api.buf')
 local actions = require('file-tree.actions')
 local create = require('file-tree.utils.create')
 

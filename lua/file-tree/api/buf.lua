@@ -1,5 +1,4 @@
 local fn = require('file-tree.api.fn')
-local g = require('file-tree.api.global')
 
 local M = {}
 

@@ -1,6 +1,5 @@
 local uv = vim.loop
 local create = require('file-tree.utils.create')
-local g = require('file-tree.api.global')
 
 local log = require('file-tree.logger').log
 
