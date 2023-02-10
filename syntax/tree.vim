@@ -1,10 +1,10 @@
 syn match TreeIcon     /\(^\(  \)*. \)\@<=[^ ]/
-syn match TreeDirIcon  /[ﱮ▸▾•]/ containedin=TreeIcon
-syn match TreeFileIcon /[•]/    containedin=TreeIcon
+syn match TreeDirIcon  /[󰉋󰝰▸▾•]/ containedin=TreeIcon
+syn match TreeFileIcon /[󰈔•]/    containedin=TreeIcon
 
-syn match TreeName     /\(^\(  \)*. [ﱮ▸▾•] \)\@<=.*$/
-syn match TreeDirName  /\(^\(  \)*. [ﱮ▸▾•] \)\@<=.*$/
-syn match TreeFileName /\(^\(  \)*. [•] \)\@<=.*$/
+syn match TreeName     /\(^\(  \)*. [󰉋󰝰󰈔▸▾•] \)\@<=.*$/
+syn match TreeDirName  /\(^\(  \)*. [󰉋󰝰▸▾•] \)\@<=.*$/
+syn match TreeFileName /\(^\(  \)*. [󰈔•] \)\@<=.*$/
 syn match TreeDirSlash #/# containedin=TreeName,TreeDirName
 
 syn match TreeStatus            /\(^\(  \)*\)\@<=[^ ]\([^ ] \)\@=/

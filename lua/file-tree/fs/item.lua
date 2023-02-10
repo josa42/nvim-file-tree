@@ -6,7 +6,8 @@ local create = require('file-tree.utils.create')
 local Item = {}
 
 local iconThemes = {
-  nerdfont = { '', 'ﱮ', '' },
+  -- nf-md-folder | nf-md-folder_open | nf-md-file_outline
+  nerdfont = { '󰉋', '󰝰', '󰈔' },
   default = { '▸', '▾', '•' },
 }
 
