@@ -1,21 +1,9 @@
 local fs = require('file-tree.fs.fs')
 local status = require('file-tree.fs.status')
-local g = require('file-tree.api.global')
 local create = require('file-tree.utils.create')
+local config = require('file-tree.config')
 
 local Item = {}
-
-local iconThemes = {
-  -- nf-md-folder | nf-md-folder_open | nf-md-file_outline
-  nerdfont = { '󰉋', '󰝰', '󰈔' },
-  default = { '▸', '▾', '•' },
-}
-
-local status_icons = {
-  [status.Changed] = '◎',
-  [status.Untracked] = '⦿',
-  [status.Conflicted] = '◉',
-}
 
 function Item:create(provider, path)
   return create(self, {
@@ -90,10 +78,8 @@ function Item:toggle()
 end
 
 function Item:icon()
-  local icons = iconThemes['default']
-  if g.get_var('nerdfont') then
-    icons = iconThemes['nerdfont']
-  end
+  local signs = config.tree_signs
+  local icons = { signs.dir, signs.dir_open, signs.file }
 
   if self.is_dir then
     if not self.is_open then
@@ -109,10 +95,8 @@ end
 function Item:status_icon()
   local s = self.provider.status:get(self.path, self.is_dir)
 
-  for key, icon in pairs(status_icons) do
-    if key == s then
-      return icon
-    end
+  if config.status_signs[s] ~= nil then
+    return config.status_signs[s]
   end
 
   return ' '

@@ -1,5 +1,7 @@
 -- Source: https://github.com/josa42/nvim-filetree/blob/b0d980a03c10ad357c4959d783bf58e81c3d89e3/pkg/plugin.go
 
+local config = require('file-tree.config')
+
 local buf = require('file-tree.api.buf')
 local tab = require('file-tree.api.tab')
 local win = require('file-tree.api.win')
@@ -18,6 +20,12 @@ local var_tree_buf = '__tree_buffer_id'
 local var_is_open = '__file-tree_open'
 local var_is_opening = '__file-tree_opening'
 local width = 40
+
+function M.config(opts)
+  opts = opts or {}
+  config.tree_signs = vim.tbl_extend('force', config.tree_signs, opts.tree_signs or {})
+  config.status_signs = vim.tbl_extend('force', config.status_signs, opts.status_signs or {})
+end
 
 function M.setup()
   g.set_var(var_is_open, false)

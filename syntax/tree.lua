@@ -1,11 +1,16 @@
+local signs = require('file-tree.config').tree_signs
+local file = signs.file
+local dir = ('%s%s'):format(signs.dir, signs.dir_open)
+local entry = ('%s%s'):format(dir, file)
+
 vim.cmd.syn('match', 'TreeIcon', [[/\(^\(  \)*. \)\@<=[^ ]/]])
-vim.cmd.syn('match', 'TreeDirIcon', [[/[󰉋󰝰▸▾•]/]], 'containedin=TreeIcon')
-vim.cmd.syn('match', 'TreeFileIcon', [[/[󰈔•]/]], 'containedin=TreeIcon')
+vim.cmd.syn('match', 'TreeDirIcon', ([[/[%s]/]]):format(dir), 'containedin=TreeIcon')
+vim.cmd.syn('match', 'TreeFileIcon', ([[/[%s]/]]):format(file), 'containedin=TreeIcon')
 
-vim.cmd.syn('match', 'TreeName', [[/\(^\(  \)*. [󰉋󰝰󰈔▸▾•] \)\@<=.*$/]])
+vim.cmd.syn('match', 'TreeName', ([[/\(^\(  \)*. [%s] \)\@<=.*$/]]):format(entry))
 
-vim.cmd.syn('match', 'TreeDirName', [[/\(^\(  \)*. [󰉋󰝰▸▾•] \)\@<=.*$/]])
-vim.cmd.syn('match', 'TreeFileName', [[/\(^\(  \)*. [󰈔•] \)\@<=.*$/]])
+vim.cmd.syn('match', 'TreeDirName', ([[/\(^\(  \)*. [%s] \)\@<=.*$/]]):format(dir))
+vim.cmd.syn('match', 'TreeFileName', ([[/\(^\(  \)*. [%s] \)\@<=.*$/]]):format(file))
 
 vim.cmd.syn('match', 'TreeDirSlash', [[#/#]], 'containedin=TreeName,TreeDirName')
 
