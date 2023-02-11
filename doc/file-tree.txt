@@ -1,0 +1,54 @@
+==============================================================================
+NVIM-FILE-TREE                                                  *nvim-file-tree*
+
+TDB
+
+==============================================================================
+Contents                                               *nvim-file-tree.contents*
+
+    Contents...........................................|nvim-file-tree.contents|
+    Features...........................................|nvim-file-tree.features|
+    Key Mappings...................................|nvim-file-tree.key-mappings|
+    .Configuration.......................................|nvim-file-tree.config|
+
+
+==============================================================================
+Features                                               *nvim-file-tree.features*
+
+TBD
+
+==============================================================================
+Key Mappings                                       *nvim-file-tree.key-mappings*
+
+TBD
+
+==============================================================================
+Configuration                                            *nvim-file-tree.config*
+
+    Config function to set options.
+
+    Usage:
+    >
+    require('file-tree').config(opts)
+<
+
+
+    Valid keys for {opts}
+
+                                                     *nvim-file-tree.tree_signs*
+    tree_signs: ~
+
+        file
+        dir
+        dir_open
+
+                                                   *nvim-file-tree.status_signs*
+    status_signs: ~
+
+        changed
+        untracked
+        conflicted
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
+
