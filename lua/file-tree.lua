@@ -226,7 +226,7 @@ function M.on_leave_close_last_tree()
     local t = tab.get_current()
     for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
       if #vim.api.nvim_list_wins() == 1 then
-        vim.cmd('quit')
+        vim.cmd.quit()
       else
         vim.api.nvim_win_close(w, true)
       end

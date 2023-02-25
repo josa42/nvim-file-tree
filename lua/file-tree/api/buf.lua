@@ -10,7 +10,7 @@ end
 function M.close(b)
   if b > 0 then
     pcall(vim.api.nvim_buf_detach, b)
-    vim.cmd('bwipeout ' .. b)
+    vim.cmd.bwipeout(b)
   end
 end
 

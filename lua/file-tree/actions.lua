@@ -3,7 +3,7 @@ local win = require('file-tree.api.win')
 
 local function open(cmd, item)
   require('file-tree').unfocus()
-  vim.cmd(cmd .. ' ' .. item.path)
+  vim.cmd[cmd](item.path)
 end
 
 local function select(item)
