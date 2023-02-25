@@ -21,14 +21,14 @@ function M.Renderer:render()
   local linesHash = vim.fn.json_encode(lines)
 
   if self.linesHash ~= linesHash then
-    buf.set_option(self.buf, 'modifiable', true)
-    buf.set_option(self.buf, 'readonly', false)
+    vim.bo[self.buf].modifiable = true
+    vim.bo[self.buf].readonly = false
     local c = vim.api.nvim_win_get_cursor(0)
 
     buf.set_lines(self.buf, lines)
 
-    buf.set_option(self.buf, 'modifiable', false)
-    buf.set_option(self.buf, 'readonly', true)
+    vim.bo[self.buf].modifiable = false
+    vim.bo[self.buf].readonly = true
     vim.api.nvim_win_set_cursor(0, c)
 
     self.linesHash = linesHash

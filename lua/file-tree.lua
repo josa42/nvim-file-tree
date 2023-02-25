@@ -5,7 +5,6 @@ local config = require('file-tree.config')
 local buf = require('file-tree.api.buf')
 local tab = require('file-tree.api.tab')
 local win = require('file-tree.api.win')
-local g = require('file-tree.api.global')
 local renderer = require('file-tree.renderer')
 local TreeView = require('file-tree.view')
 local FileProvider = require('file-tree.fs.provider')
@@ -146,7 +145,7 @@ function l.create_tree_buffer()
 
   vim.b[b][var_is_tree] = true
   vim.b[b][var_hide_lightline] = true
-  buf.set_option(b, 'filetype', 'tree')
+  vim.bo[b].filetype = 'tree'
   buf.set_name(b, buffer_name)
 
   vim.w[var_is_tree] = true
@@ -191,8 +190,7 @@ end
 function l.tab_attach_tree_buffer(b)
   vim.cmd('topleft vertical ' .. width .. ' new | buffer ' .. b)
 
-  local w = win.get_current()
-  vim.api.nvim_win_set_option(w, 'winfixwidth', true)
+  vim.wo.winfixwidth = true
   vim.w[var_is_tree] = true
 end
 

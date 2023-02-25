@@ -2,9 +2,6 @@ local fn = require('file-tree.api.fn')
 
 local M = {}
 
-M.get_option = fn.wrap_pcall(vim.api.nvim_buf_get_option)
-M.set_option = fn.wrap_pcall(vim.api.nvim_buf_set_option)
-
 function M.set_lines(b, lines)
   local ok = pcall(vim.api.nvim_buf_set_lines, b, 0, -1, false, lines)
   return ok
