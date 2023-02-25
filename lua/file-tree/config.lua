@@ -1,9 +1,8 @@
 local status = require('file-tree.fs.status')
-local g = require('file-tree.api.global')
 
 local M = {}
 
-M.tree_signs = g.get_var('nerdfont') and {
+M.tree_signs = vim.g.nerdfont and {
   file = '󰈔',
   dir = '󰉋',
   dir_open = '󰝰',

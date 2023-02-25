@@ -2,9 +2,6 @@ local fn = require('file-tree.api.fn')
 
 local M = {}
 
-M.get_var = fn.wrap_pcall(vim.api.nvim_win_get_var)
-M.set_var = fn.wrap_pcall(vim.api.nvim_win_set_var)
-
 M.get_current = vim.api.nvim_get_current_win
 M.set_current = vim.api.nvim_set_current_win
 
