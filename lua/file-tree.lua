@@ -35,6 +35,18 @@ function M.setup()
   vim.api.nvim_create_autocmd('WinEnter', { callback = M.on_enter_sync_state })
   vim.api.nvim_create_autocmd('BufEnter', { callback = M.on_leave_close_last_tree })
   vim.api.nvim_create_autocmd('WinLeave', { callback = M.on_leave_unfocus_tree })
+  vim.api.nvim_create_autocmd('BufEnter', {
+    callback = function()
+      if vim.w[var_is_tree] and not vim.b[var_is_tree] then
+        local buf = vim.api.nvim_get_current_buf()
+
+        vim.api.nvim_set_current_buf(l.get_tree_buffer())
+
+        M.unfocus()
+        vim.api.nvim_set_current_buf(buf)
+      end
+    end,
+  })
 end
 
 --------------------------------------------------------------------------------
@@ -137,25 +149,24 @@ function l.create_tree_buffer()
   buf.set_option(b, 'filetype', 'tree')
   buf.set_name(b, buffer_name)
 
-  --
-  vim.cmd('setlocal ' .. table.concat({
-    'cursorline',
-    'foldcolumn=0',
-    'nonumber',
-    'foldmethod=manual',
-    'nocursorcolumn',
-    'nofoldenable',
-    'nolist',
-    'norelativenumber',
-    'nospell',
-    'nowrap',
-    'signcolumn=no',
-    'colorcolumn=',
-    'buftype=nofile',
-  }, ' '))
+  vim.w[var_is_tree] = true
 
-  vim.cmd('iabclear <buffer>')
-  vim.cmd('set winhighlight=Normal:TreeNormal')
+  vim.opt_local.cursorline = true
+  vim.opt_local.foldcolumn = '0'
+  vim.opt_local.number = false
+  vim.opt_local.cursorcolumn = false
+  vim.opt_local.foldenable = false
+  vim.opt_local.list = false
+  vim.opt_local.spell = false
+  vim.opt_local.wrap = false
+  vim.opt_local.signcolumn = 'no'
+  vim.opt_local.colorcolumn = ''
+  vim.opt_local.buftype = 'nofile'
+  vim.opt_local.winhighlight = 'Normal:TreeNormal'
+
+  if vim.fn.exists('&statuscolumn') == 1 then
+    vim.opt_local.statuscolumn = ''
+  end
   --
   if M.tree_view == nil then
     M.provider = FileProvider:create()
@@ -182,6 +193,7 @@ function l.tab_attach_tree_buffer(b)
 
   local w = win.get_current()
   vim.api.nvim_win_set_option(w, 'winfixwidth', true)
+  vim.w[var_is_tree] = true
 end
 
 --------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # Nvim File Tree
 
-![screeshot](.github/screenshot.jpg)
+![screenshot](.github/screenshot.jpg)
 
 <!--
 ## Features
